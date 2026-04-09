@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Card Maker V42 - Ultimate Pro Edition</title>
+    <title>Card Maker V43 - Auto Wrap & Dynamic Push-down</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,7 +22,7 @@
         html, body { overflow: hidden; width: 100%; height: 100%; margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: 'Noto Sans JP', sans-serif; -webkit-text-size-adjust: 100%; }
         * { box-sizing: border-box; }
 
-        /* ズーム防止（iPhone特有のダブルタップズームを防ぐ） */
+        /* ズーム防止 */
         button, input, select, textarea { touch-action: manipulation; }
 
         .app-wrapper { display: flex; flex-direction: column; height: 100dvh; width: 100%; }
@@ -78,7 +78,6 @@
 
         .layout-controls { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 15px; background: var(--panel); border-radius: 12px 12px 0 0; display: flex; flex-direction: column;}
         
-        /* ▼ リセットボタン群（３つ並び） ▼ */
         .history-bar { display: flex; gap: 8px; margin-bottom: 15px; }
         .btn-history { flex: 1; color: #fff; border: 1px solid #555; padding: 10px 5px; border-radius: 8px; font-size: 0.8rem; font-weight: bold; cursor: pointer; white-space: nowrap; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
         .btn-undo { background: linear-gradient(135deg, #2ecc71, #27ae60); border-color: #27ae60; }
@@ -88,23 +87,19 @@
         .btn-reset-all { background: linear-gradient(135deg, #e74c3c, #c0392b); border-color: #c0392b; }
         .btn-reset-all:active { background: #c0392b; }
 
-        /* 微調整ボタン群 */
         .range-group { display: flex; align-items: center; gap: 6px; margin-bottom: 12px; font-size: 0.95em; }
         .range-group label { width: 35px; margin: 0; color: #aaa; font-size: 0.85rem;}
         input[type="range"] { flex: 1; cursor: pointer; accent-color: var(--accent); margin: 0; padding: 0; background: transparent; border: none; }
         .num-input { width: 65px !important; margin: 0 !important; text-align: center; padding: 8px 5px !important; font-family: monospace; font-size: 0.95rem; }
-        /* ズーム防止特化クラス */
         .btn-step { background: #333; color: #fff; border: 1px solid #555; border-radius: 6px; width: 34px; height: 34px; font-size: 1.2rem; font-weight: bold; display: flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
         .btn-step:active { background: var(--accent); color: #000; border-color: var(--accent); }
 
-        /* 下部アクションバー */
         .bottom-actions { display: flex; gap: 8px; margin-top: auto; padding-top: 10px; padding-bottom: 15px;}
         .btn-action { flex: 0 0 auto; background: #333; color: #fff; border: 1px solid #555; border-radius: 8px; font-weight: bold; padding: 10px; font-size: 0.85rem; font-family: 'Noto Sans JP', sans-serif; box-shadow: 0 4px 10px rgba(0,0,0,0.3); transition: 0.2s;}
         .btn-action:active { transform: scale(0.95); }
         .btn-dl-layout { flex: 1; padding: 10px; background: linear-gradient(135deg, #ff4757, #ff6b81); color: #fff; border: none; font-weight: 900; font-family: 'Noto Sans JP', sans-serif; font-size: 1.05rem; border-radius: 8px; cursor: pointer; text-shadow: 1px 1px 3px rgba(0,0,0,0.5); box-shadow: 0 4px 15px rgba(255, 71, 87, 0.4); }
         .btn-dl-layout:active { transform: translateY(3px); box-shadow: 0 2px 10px rgba(255, 71, 87, 0.4); }
 
-        /* トリミングモーダル */
         #cropModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.95); z-index: 9999; flex-direction: column; align-items: center; justify-content: center; }
         .crop-container { width: 95%; max-height: 70vh; background: #000; margin-bottom: 20px; border-radius: 8px; overflow: hidden; }
         .crop-container img { max-width: 100%; display: block; }
@@ -120,10 +115,9 @@
 <div style="font-family: 'NotoSansJPThin'; visibility: hidden; position: absolute;">極細</div>
 
 <div class="app-wrapper">
-
     <div class="header">
         <h1>CARD MAKER</h1>
-        <button class="btn-preview-open" onclick="openPreview()">プレビュー ＆ 調整</button>
+        <button class="btn-preview-open" onclick="openPreview()">👁️ プレビュー ＆ 調整</button>
     </div>
 
     <div class="edit-preview-area">
@@ -138,7 +132,6 @@
     </div>
 
     <div class="controls-container">
-
         <div id="tab-text" class="control-section">
             <label>カード名</label>
             <div style="display:flex; gap:10px; margin-bottom: 10px;">
@@ -155,7 +148,7 @@
             </div>
 
             <label style="margin-top: 20px;">二つ名 (肩書き)</label>
-            <input type="text" id="subName" value="">
+            <input type="text" id="subName" value="片翼の天使">
             <div class="color-row">
                 <label>文字色</label><input type="color" id="subColor" value="#000000">
                 <label>縁色</label><input type="color" id="subBorder" value="#ffffff">
@@ -166,7 +159,7 @@
             <div class="section-box box-accent">
                 <label>技1</label>
                 <div style="display:flex; gap:10px;">
-                    <input type="text" id="s1Name" value="" style="flex:2">
+                    <input type="text" id="s1Name" value="八刀一閃" style="flex:2">
                     <input type="number" id="s1Dmg" value="500" style="flex:1">
                 </div>
                 <div class="color-row">
@@ -174,12 +167,12 @@
                     <label>縁</label><input type="color" id="s1Border" value="#ffffff">
                     <label>説明</label><input type="color" id="s1DescColor" value="#000000">
                 </div>
-                <textarea id="s1Desc" rows="2"></textarea>
+                <textarea id="s1Desc" rows="2">このカードはいかなる効果を受けず、手札にいる時はダメージを受けない</textarea>
             </div>
             <div class="section-box">
                 <label>技2</label>
                 <div style="display:flex; gap:10px;">
-                    <input type="text" id="s2Name" value="" style="flex:2">
+                    <input type="text" id="s2Name" value="片翼の天使" style="flex:2">
                     <input type="number" id="s2Dmg" value="" style="flex:1">
                 </div>
                 <div class="color-row">
@@ -187,12 +180,12 @@
                     <label>縁</label><input type="color" id="s2Border" value="#ffffff">
                     <label>説明</label><input type="color" id="s2DescColor" value="#000000">
                 </div>
-                <textarea id="s2Desc" rows="2"></textarea>
+                <textarea id="s2Desc" rows="2">このカードに無効化や無視は通用しない</textarea>
             </div>
             <div class="section-box">
                 <label>技3</label>
                 <div style="display:flex; gap:10px;">
-                    <input type="text" id="s3Name" value="" style="flex:2">
+                    <input type="text" id="s3Name" value="スーパーノヴァ" style="flex:2">
                     <input type="number" id="s3Dmg" value="9999" style="flex:1">
                 </div>
                 <div class="color-row">
@@ -200,7 +193,7 @@
                     <label>縁</label><input type="color" id="s3Border" value="#ffffff">
                     <label>説明</label><input type="color" id="s3DescColor" value="#000000">
                 </div>
-                <textarea id="s3Desc" rows="2"></textarea>
+                <textarea id="s3Desc" rows="2">相手のHPを１にする</textarea>
             </div>
             <div class="section-box">
                 <label>技4</label>
@@ -219,7 +212,7 @@
 
         <div id="tab-status" class="control-section">
             <label>ステータスメッセージ (フレーバーテキスト)</label>
-            <input type="text" id="statusMsg" value="">
+            <input type="text" id="statusMsg" value="絶望を贈ろうーーー">
             <div class="color-row">
                 <label>文字色</label><input type="color" id="statusColor" value="#ffffff">
                 <label>縁色</label><input type="color" id="statusBorder" value="#000000">
@@ -236,7 +229,7 @@
         </div>
 
         <div id="tab-assets" class="control-section">
-            <label>メイン画像 (キャラ画像)</label>
+            <label>📷 メイン画像 (キャラ画像)</label>
             <input type="file" id="uploadImage" accept="image/*" style="background:#222; border-color:var(--accent);">
             <hr style="border-top:1px solid #444; margin:20px 0;">
             
@@ -266,15 +259,14 @@
     </div>
 
     <div class="layout-controls">
-        
         <div id="padContainer">
             <div class="history-bar">
                 <button class="btn-history btn-undo" onclick="undoLayout()">↩ 戻す</button>
-                <button class="btn-history btn-reset-single" onclick="resetCurrentLayout()">選択リセット</button>
-                <button class="btn-history btn-reset-all" onclick="resetAllLayout()">全リセット</button>
+                <button class="btn-history btn-reset-single" onclick="resetCurrentLayout()">🔄 選択リセット</button>
+                <button class="btn-history btn-reset-all" onclick="resetAllLayout()">⚠️ 全リセット</button>
             </div>
 
-            <select id="targetSelect">
+            <select id="targetSelect" style="margin-bottom: 15px;">
                 <option value="image">メイン画像</option>
                 <option value="frame">フレーム画像</option>
                 <option value="name">カード名</option>
@@ -316,11 +308,10 @@
         </div>
 
         <div class="bottom-actions">
-            <button id="btnExpandToggle" class="btn-action" onclick="toggleExpandMode()">拡大</button>
-            <button id="btnLockToggle" class="btn-action" onclick="toggleLockMode()" style="background:#2e7d32; border-color:#4caf50;">自動選択ON</button>
-            <button class="btn-dl-layout" onclick="downloadCard()">保存</button>
+            <button id="btnExpandToggle" class="btn-action" onclick="toggleExpandMode()">🔲 拡大</button>
+            <button id="btnLockToggle" class="btn-action" onclick="toggleLockMode()" style="background:#2e7d32; border-color:#4caf50;">👆 自動選択ON</button>
+            <button class="btn-dl-layout" onclick="downloadCard()">📸 保存</button>
         </div>
-        
     </div>
 </div>
 
@@ -345,7 +336,6 @@
     function openPreview() { document.getElementById('previewModal').style.display = 'flex'; drawCard(); }
     function closePreview() { document.getElementById('previewModal').style.display = 'none'; }
 
-    // ▼ 拡大モードと自動選択モード（ターゲット固定機能） ▼
     let isExpanded = false;
     function toggleExpandMode() {
         isExpanded = !isExpanded;
@@ -353,24 +343,20 @@
         const pad = document.getElementById('padContainer');
         const btn = document.getElementById('btnExpandToggle');
         if(isExpanded) {
-            modal.classList.add('expanded-mode'); pad.style.display = 'none'; btn.innerHTML = 'パッド';
+            modal.classList.add('expanded-mode'); pad.style.display = 'none'; btn.innerHTML = '🔽 パッド';
         } else {
-            modal.classList.remove('expanded-mode'); pad.style.display = 'block'; btn.innerHTML = '拡大';
+            modal.classList.remove('expanded-mode'); pad.style.display = 'block'; btn.innerHTML = '🔲 拡大';
         }
     }
 
-    let isLockMode = false; // true = 固定（自動選択OFF）, false = 自動選択ON
+    let isLockMode = false; 
     function toggleLockMode() {
         isLockMode = !isLockMode;
         const btn = document.getElementById('btnLockToggle');
         if(isLockMode) {
-            btn.innerHTML = '選択固定ON';
-            btn.style.background = '#e67e22'; // オレンジ
-            btn.style.borderColor = '#d35400';
+            btn.innerHTML = '🎯 選択固定ON'; btn.style.background = '#e67e22'; btn.style.borderColor = '#d35400';
         } else {
-            btn.innerHTML = '自動選択ON';
-            btn.style.background = '#2e7d32'; // 緑
-            btn.style.borderColor = '#4caf50';
+            btn.innerHTML = '👆 自動選択ON'; btn.style.background = '#2e7d32'; btn.style.borderColor = '#4caf50';
         }
     }
 
@@ -398,7 +384,7 @@
     const layoutCanvas = document.getElementById('layoutCanvas');
     const currentImages = { user: null, frame: null, rarity1: null, rarity2: null, rarity3: null, attr: null };
 
-    // ▼ 技4を追加し、Y間隔を詰めて4つ入るように調整 ▼
+    // ▼ フォント大型化に合わせ、初期Y座標を調整 ▼
     const elements = {
         image:      { x: 0, y: 0, scale: 1.0 },
         frame:      { x: -300, y: -435, scale: 2.0 }, 
@@ -410,16 +396,20 @@
         attr:       { x: 515, y: 25, scale: 0.8 }, 
         skills_all: { x: 0, y: 0, scale: 1.0 },      
         skill1:     { x: 40, y: 470, scale: 1.0 }, 
-        skill2:     { x: 40, y: 550, scale: 1.0 },  
-        skill3:     { x: 40, y: 630, scale: 1.0 },
-        skill4:     { x: 40, y: 710, scale: 1.0 },
-        statusMsg:  { x: 40, y: 800, scale: 1.0 },   
+        skill2:     { x: 40, y: 565, scale: 1.0 },  
+        skill3:     { x: 40, y: 660, scale: 1.0 },
+        skill4:     { x: 40, y: 755, scale: 1.0 },
+        statusMsg:  { x: 40, y: 845, scale: 1.0 },   
         hp:         { x: 570, y: 830, scale: 1.0 } 
     };
 
     const defaultElementsStr = JSON.stringify(elements);
     let historyStack = []; 
     let currentTarget = 'image';
+    
+    // ▼ 動的押し出しや枠の大きさを記憶するグローバル変数 ▼
+    window.dynamicOffsets = { skill1: 0, skill2: 0, skill3: 0, skill4: 0, statusMsg: 0 };
+    window.hitBoxHeights = {};
 
     function saveHistory() {
         historyStack.push(JSON.stringify(elements));
@@ -431,31 +421,21 @@
             const prevState = historyStack.pop();
             const parsed = JSON.parse(prevState);
             for(let key in parsed) {
-                elements[key].x = parsed[key].x;
-                elements[key].y = parsed[key].y;
-                elements[key].scale = parsed[key].scale;
+                elements[key].x = parsed[key].x; elements[key].y = parsed[key].y; elements[key].scale = parsed[key].scale;
             }
             updateInputsFromState(); drawCard();
-        } else {
-            alert("これ以上前には戻せません！");
-        }
+        } else { alert("これ以上前には戻せません！"); }
     }
 
-    // 選択中のレイヤーのみリセット
     function resetCurrentLayout() {
-        saveHistory();
-        const defaults = JSON.parse(defaultElementsStr);
-        elements[currentTarget].x = defaults[currentTarget].x;
-        elements[currentTarget].y = defaults[currentTarget].y;
-        elements[currentTarget].scale = defaults[currentTarget].scale;
+        saveHistory(); const defaults = JSON.parse(defaultElementsStr);
+        elements[currentTarget].x = defaults[currentTarget].x; elements[currentTarget].y = defaults[currentTarget].y; elements[currentTarget].scale = defaults[currentTarget].scale;
         updateInputsFromState(); drawCard();
     }
 
-    // 全リセット
     function resetAllLayout() {
         if(confirm("すべての配置とサイズを初期状態に戻しますか？")) {
-            saveHistory();
-            const defaults = JSON.parse(defaultElementsStr);
+            saveHistory(); const defaults = JSON.parse(defaultElementsStr);
             for(let key in defaults) {
                 elements[key].x = defaults[key].x; elements[key].y = defaults[key].y; elements[key].scale = defaults[key].scale;
             }
@@ -467,13 +447,9 @@
         createOptions('frameSelect', assets.frame); createOptions('attrSelect', assets.attr);
         createOptions('rarity1Select', assets.rarity); createOptions('rarity2Select', assets.rarity); createOptions('rarity3Select', assets.rarity);
         
-        document.getElementById('frameSelect').selectedIndex = 1; 
-        document.getElementById('attrSelect').selectedIndex = 8; 
-        document.getElementById('rarity1Select').selectedIndex = 5; 
+        document.getElementById('frameSelect').selectedIndex = 1; document.getElementById('attrSelect').selectedIndex = 8; document.getElementById('rarity1Select').selectedIndex = 5; 
         
-        changeAsset('frame'); changeAsset('attr');
-        changeAsset('rarity1', 'rarity'); changeAsset('rarity2', 'rarity'); changeAsset('rarity3', 'rarity');
-
+        changeAsset('frame'); changeAsset('attr'); changeAsset('rarity1', 'rarity'); changeAsset('rarity2', 'rarity'); changeAsset('rarity3', 'rarity');
         document.fonts.ready.then(() => { updateInputsFromState(); setTimeout(drawCard, 300); });
     };
 
@@ -483,15 +459,11 @@
     }
 
     function changeAsset(id, assetGroup) {
-        assetGroup = assetGroup || id; 
-        const index = document.getElementById(id + 'Select').value;
-        const path = assets[assetGroup][index].path;
+        assetGroup = assetGroup || id; const index = document.getElementById(id + 'Select').value; const path = assets[assetGroup][index].path;
         if (!path) { currentImages[id] = null; drawCard(); return; }
-        
         const img = new Image();
         if(path.indexOf('http') === 0) { img.crossOrigin = "anonymous"; }
-        img.onload = () => { currentImages[id] = img; drawCard(); };
-        img.src = path;
+        img.onload = () => { currentImages[id] = img; drawCard(); }; img.src = path;
     }
 
     let cropper;
@@ -512,18 +484,14 @@
         const croppedCanvas = cropper.getCroppedCanvas({ width: 600, height: 870 });
         const img = new Image();
         img.onload = () => { 
-            saveHistory();
-            currentImages.user = img; 
+            saveHistory(); currentImages.user = img; 
             elements.image.x = 0; elements.image.y = 0; elements.image.scale = 1.0;
-            if(currentTarget === 'image') updateInputsFromState();
-            drawCard(); 
+            if(currentTarget === 'image') updateInputsFromState(); drawCard(); 
         };
-        img.src = croppedCanvas.toDataURL('image/png');
-        closeCropModal();
+        img.src = croppedCanvas.toDataURL('image/png'); closeCropModal();
     }
     function closeCropModal() { cropModal.style.display = 'none'; if(cropper) { cropper.destroy(); cropper = null; } document.getElementById('uploadImage').value = ''; }
 
-    // ▼ 即時反映のためのイベント登録 ▼
     document.querySelectorAll('input:not(#uploadImage), select:not(#targetSelect), textarea').forEach(el => {
         if(el.type !== 'range' && el.type !== 'radio' && !el.classList.contains('btn-step') && el.id !== 'numX' && el.id !== 'numY' && el.id !== 'numScale') { 
             el.addEventListener('input', drawCard); 
@@ -574,14 +542,17 @@
         const sx = elements.skills_all.x, sy = elements.skills_all.y, ss = elements.skills_all.scale;
         const add = (id, x, y, w, h, scale) => { boxes.push({ id, x: x, y: y, w: w * scale, h: h * scale }); };
         
+        let d = window.dynamicOffsets || {};
+        let hInfo = window.hitBoxHeights || {};
+
         add('hp', elements.hp.x - 350 * elements.hp.scale, elements.hp.y - 10 * elements.hp.scale, 360, 80, 1);
-        add('statusMsg', elements.statusMsg.x, elements.statusMsg.y, 450, 40, elements.statusMsg.scale);
+        add('statusMsg', elements.statusMsg.x, elements.statusMsg.y + (d.statusMsg||0), 450, 40, elements.statusMsg.scale);
         
-        // 技4を追加
-        add('skill4', elements.skill4.x + sx, elements.skill4.y + sy, 520, 80, elements.skill4.scale * ss);
-        add('skill3', elements.skill3.x + sx, elements.skill3.y + sy, 520, 80, elements.skill3.scale * ss);
-        add('skill2', elements.skill2.x + sx, elements.skill2.y + sy, 520, 80, elements.skill2.scale * ss);
-        add('skill1', elements.skill1.x + sx, elements.skill1.y + sy, 520, 80, elements.skill1.scale * ss);
+        // 当たり判定の枠も、文字の長さに応じて自動拡張＆自動ズレする
+        add('skill4', elements.skill4.x + sx, elements.skill4.y + sy + (d.skill4||0), 520, hInfo.skill4||80, elements.skill4.scale * ss);
+        add('skill3', elements.skill3.x + sx, elements.skill3.y + sy + (d.skill3||0), 520, hInfo.skill3||80, elements.skill3.scale * ss);
+        add('skill2', elements.skill2.x + sx, elements.skill2.y + sy + (d.skill2||0), 520, hInfo.skill2||80, elements.skill2.scale * ss);
+        add('skill1', elements.skill1.x + sx, elements.skill1.y + sy + (d.skill1||0), 520, hInfo.skill1||80, elements.skill1.scale * ss);
         
         if(currentImages.attr) add('attr', elements.attr.x, elements.attr.y, 80, 80, elements.attr.scale);
         if(currentImages.rarity3) add('rarity3', elements.rarity3.x, elements.rarity3.y, 220, 50, elements.rarity3.scale);
@@ -599,17 +570,16 @@
     function startDrag(e) {
         if (e.type === 'touchstart') e.preventDefault(); 
         const pos = getPointerPos(e);
+        const mode = document.querySelector('input[name="dragMode"]:checked').value;
         const rect = layoutCanvas.getBoundingClientRect();
         const cx = (pos.x - rect.left) * (layoutCanvas.width / rect.width);
         const cy = (pos.y - rect.top) * (layoutCanvas.height / rect.height);
         
-        // ▼ 自動選択ON(固定されていない)場合のみ当たり判定を行う ▼
-        if (!isLockMode) {
+        if (!isLockMode && mode === 'direct') {
             const boxes = getHitBoxes();
             for (let b of boxes) { 
                 if (cx >= b.x && cx <= b.x + b.w && cy >= b.y && cy <= b.y + b.h) { 
                     let target = b.id;
-                    // プルダウンで「まとめて移動」が選ばれている時は、まとめて移動を優先維持する
                     if (target.startsWith('skill') && document.getElementById('targetSelect').value === 'skills_all') {
                         target = 'skills_all';
                     }
@@ -631,39 +601,53 @@
         elements[currentTarget].x = Math.round(initialX + dx); elements[currentTarget].y = Math.round(initialY + dy);
         updateInputsFromState(); drawCard();
     }
-    function endDrag() { isDragging = false; }
     
+    function endDrag() { isDragging = false; }
     layoutCanvas.addEventListener('mousedown', startDrag); layoutCanvas.addEventListener('touchstart', startDrag, { passive: false });
     window.addEventListener('mousemove', drag); window.addEventListener('touchmove', drag, { passive: false });
     window.addEventListener('mouseup', endDrag); window.addEventListener('touchend', endDrag);
-    
-    // ▼ フリーズ防止処理 ▼
-    window.addEventListener('touchcancel', endDrag);
-    window.addEventListener('blur', endDrag);
+    window.addEventListener('touchcancel', endDrag); window.addEventListener('blur', endDrag);
 
-    function drawKillgoText(ctx, text, x, y, size, color, borderColor, align = 'left') {
-        ctx.font = `${size}px 'KillgoWeb', 'Dela Gothic One', sans-serif`;
-        ctx.textAlign = align; ctx.textBaseline = "top"; ctx.lineJoin = 'miter'; ctx.miterLimit = 3; 
-        ctx.strokeStyle = borderColor; ctx.lineWidth = size / 4; ctx.strokeText(text, x, y);
-        ctx.fillStyle = color; ctx.fillText(text, x, y);
-    }
-
-    function drawDescText(ctx, text, x, y, maxWidth, lineHeight, fontSize, fillColor, borderColor="#ffffff", isItalic=false, borderWidthRatio=0.12) {
-        const lines = text.split('\n'); let cursorY = y;
-        ctx.font = `${isItalic ? "italic" : "normal"} ${fontSize}px 'NotoSansJPThin', sans-serif`;
-        ctx.textAlign = "left"; ctx.textBaseline = "top"; ctx.lineJoin = 'round';
-        ctx.strokeStyle = borderColor; ctx.lineWidth = fontSize * borderWidthRatio; ctx.fillStyle = fillColor;   
+    // ▼ 自動改行・折り返し対応の最強テキスト描画関数 ▼
+    function renderWrappedText(ctx, text, x, y, maxWidth, lineHeight, action = 'draw') {
+        if (!text) return 0;
+        const lines = text.split('\n');
+        let cursorY = y;
         lines.forEach(line => {
-            let words = line.split(''), lineBuffer = '';
+            let words = line.split('');
+            let lineBuffer = '';
             for(let n = 0; n < words.length; n++) {
                 let testLine = lineBuffer + words[n];
                 if (ctx.measureText(testLine).width > maxWidth && n > 0) {
-                    ctx.strokeText(lineBuffer, x, cursorY); ctx.fillText(lineBuffer, x, cursorY);
-                    lineBuffer = words[n]; cursorY += lineHeight;
-                } else { lineBuffer = testLine; }
+                    if (action === 'draw') { ctx.strokeText(lineBuffer, x, cursorY); ctx.fillText(lineBuffer, x, cursorY); }
+                    lineBuffer = words[n];
+                    cursorY += lineHeight;
+                } else {
+                    lineBuffer = testLine;
+                }
             }
-            ctx.strokeText(lineBuffer, x, cursorY); ctx.fillText(lineBuffer, x, cursorY); cursorY += lineHeight;
+            if (action === 'draw') { ctx.strokeText(lineBuffer, x, cursorY); ctx.fillText(lineBuffer, x, cursorY); }
+            cursorY += lineHeight;
         });
+        return cursorY - y; // 使用した高さを返す
+    }
+
+    function drawKillgoText(ctx, text, x, y, size, color, borderColor, align = 'left', maxWidth = 9999) {
+        ctx.font = `${size}px 'KillgoWeb', 'Dela Gothic One', sans-serif`;
+        ctx.textAlign = align; ctx.textBaseline = "top"; ctx.lineJoin = 'miter'; ctx.miterLimit = 3; 
+        ctx.strokeStyle = borderColor; ctx.lineWidth = size / 4; ctx.fillStyle = color;
+        // 右揃え（ダメージ）はそのまま描画、それ以外は端ガード発動
+        if(align === 'right') {
+            ctx.strokeText(text, x, y); ctx.fillText(text, x, y); return size * 1.2;
+        }
+        return renderWrappedText(ctx, text, x, y, maxWidth, size * 1.2, 'draw');
+    }
+
+    function drawDescText(ctx, text, x, y, maxWidth, lineHeight, fontSize, fillColor, borderColor="#ffffff", isItalic=false, borderWidthRatio=0.12) {
+        ctx.font = `${isItalic ? "italic" : "normal"} ${fontSize}px 'NotoSansJPThin', sans-serif`;
+        ctx.textAlign = "left"; ctx.textBaseline = "top"; ctx.lineJoin = 'round';
+        ctx.strokeStyle = borderColor; ctx.lineWidth = fontSize * borderWidthRatio; ctx.fillStyle = fillColor;   
+        return renderWrappedText(ctx, text, x, y, maxWidth, lineHeight, 'draw');
     }
 
     function drawCard() {
@@ -685,15 +669,16 @@
             ctx.scale(el.scale, el.scale); ctx.drawImage(currentImages.frame, 0, 0); ctx.restore();
         }
 
+        // ▼ 全フォントの画面端ガード（自動改行）計算 ▼
         const subEl = elements.subName; ctx.save();
         ctx.translate(subEl.x, subEl.y); ctx.scale(subEl.scale, subEl.scale);
-        drawDescText(ctx, document.getElementById('subName').value, 0, 0, 500, 20, 18, document.getElementById('subColor').value, document.getElementById('subBorder').value, false, 0.25);
+        drawDescText(ctx, document.getElementById('subName').value, 0, 0, Math.max(100, 600 - subEl.x - 20), 20, 18, document.getElementById('subColor').value, document.getElementById('subBorder').value, false, 0.25);
         ctx.restore();
 
         const nameEl = elements.name, nameSizeOption = document.getElementById('cardNameSize').value;
         let activeNameSize = nameSizeOption === 'medium' ? 46 : (nameSizeOption === 'small' ? 36 : 56);
         ctx.save(); ctx.translate(nameEl.x, nameEl.y); ctx.scale(nameEl.scale, nameEl.scale);
-        drawKillgoText(ctx, document.getElementById('cardName').value, 0, 0, activeNameSize, document.getElementById('nameColor').value, document.getElementById('nameBorder').value, "left");
+        drawKillgoText(ctx, document.getElementById('cardName').value, 0, 0, activeNameSize, document.getElementById('nameColor').value, document.getElementById('nameBorder').value, "left", Math.max(100, 600 - nameEl.x - 20));
         ctx.restore();
 
         ['rarity1', 'rarity2', 'rarity3'].forEach(rKey => {
@@ -711,23 +696,56 @@
             ctx.drawImage(currentImages.attr, 0, 0, 80, 80); ctx.restore();
         }
 
+        // ▼ 技の自動押し出し＆端ガードシステム ▼
         const group = elements.skills_all; 
+        let currentPushDown = 0; // どれくらい下に押し出されるかの蓄積
+
         for(let i=1; i<=4; i++) {
             const el = elements['skill' + i];
             const name = document.getElementById('s' + i + 'Name').value, dmg = document.getElementById('s' + i + 'Dmg').value, desc = document.getElementById('s' + i + 'Desc').value;
-            if(!name && !desc) continue;
-            ctx.save(); ctx.translate(el.x + group.x, el.y + group.y); ctx.scale(el.scale * group.scale, el.scale * group.scale);
             
-            // 4つ入れるために文字を少しだけ縮小
-            drawKillgoText(ctx, name, 0, 0, 34, document.getElementById('s' + i + 'Color').value, document.getElementById('s' + i + 'Border').value, "left");
-            if(dmg) drawKillgoText(ctx, dmg, 520, 0, 36, document.getElementById('s' + i + 'Color').value, document.getElementById('s' + i + 'Border').value, "right");
-            if(desc) drawDescText(ctx, desc, 0, 40, 520, 22, 20, document.getElementById('s' + i + 'DescColor').value, "#ffffff", false, 0.12);
+            // 当たり判定・押し出し処理のために現在のYズレを記録
+            window.dynamicOffsets['skill' + i] = currentPushDown;
+            
+            if(!name && !desc) {
+                window.hitBoxHeights['skill' + i] = 0;
+                continue;
+            }
+
+            ctx.save(); 
+            let actualX = el.x + group.x;
+            let actualY = el.y + group.y + currentPushDown;
+            ctx.translate(actualX, actualY); 
+            ctx.scale(el.scale * group.scale, el.scale * group.scale);
+            
+            // さらにフォントを大きく調整！ (名前:42, ダメージ:44)
+            let nameUsedHeight = drawKillgoText(ctx, name, 0, 0, 42, document.getElementById('s' + i + 'Color').value, document.getElementById('s' + i + 'Border').value, "left", Math.max(100, 600 - actualX - 100)); // ダメージ分の余白残し
+            if(dmg) drawKillgoText(ctx, dmg, 520, 0, 44, document.getElementById('s' + i + 'Color').value, document.getElementById('s' + i + 'Border').value, "right");
+            
+            // 説明文のY位置は技名の高さに応じてズレる
+            let descStartY = Math.max(50, nameUsedHeight + 5);
+            let descUsedHeight = 0;
+            if(desc) {
+                descUsedHeight = drawDescText(ctx, desc, 0, descStartY, Math.max(100, 600 - actualX - 30), 30, 24, document.getElementById('s' + i + 'DescColor').value, "#ffffff", false, 0.12);
+            }
             ctx.restore();
+
+            // この技が使ったトータルの高さを計算
+            let totalBlockHeight = descStartY + descUsedHeight;
+            window.hitBoxHeights['skill' + i] = totalBlockHeight;
+
+            // もし通常(約85px)より大きく膨らんだら、その分だけ次の技を下に押し出す
+            let standardHeight = 85;
+            if(totalBlockHeight > standardHeight) {
+                currentPushDown += (totalBlockHeight - standardHeight);
+            }
         }
 
+        // ステータス枠も押し出された分ズレる
+        window.dynamicOffsets['statusMsg'] = currentPushDown;
         const statusEl = elements.statusMsg; ctx.save();
-        ctx.translate(statusEl.x, statusEl.y); ctx.scale(statusEl.scale, statusEl.scale);
-        drawDescText(ctx, document.getElementById('statusMsg').value, 0, 0, 450, 24, 20, document.getElementById('statusColor').value, document.getElementById('statusBorder').value, true, 0.25);
+        ctx.translate(statusEl.x, statusEl.y + currentPushDown); ctx.scale(statusEl.scale, statusEl.scale);
+        drawDescText(ctx, document.getElementById('statusMsg').value, 0, 0, Math.max(100, 600 - statusEl.x - 30), 30, 24, document.getElementById('statusColor').value, document.getElementById('statusBorder').value, true, 0.25);
         ctx.restore();
 
         const hpEl = elements.hp, hpVal = document.getElementById('hpVal').value;
@@ -748,7 +766,6 @@
 
     function downloadCard() {
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-
         if (isIOS) {
             layoutCanvas.toBlob(async function(blob) {
                 const file = new File([blob], 'オリジナルカード.png', { type: 'image/png' });
@@ -757,9 +774,7 @@
                 }
                 fallbackDownload(); 
             }, 'image/png');
-        } else {
-            fallbackDownload();
-        }
+        } else { fallbackDownload(); }
 
         function fallbackDownload() {
             const link = document.createElement('a'); link.download = 'card_maker_image.png'; link.href = layoutCanvas.toDataURL('image/png'); link.click();
