@@ -117,7 +117,7 @@
 <div class="app-wrapper">
     <div class="header">
         <h1>CARD MAKER</h1>
-        <button class="btn-preview-open" onclick="openPreview()">👁️ プレビュー ＆ 調整</button>
+        <button class="btn-preview-open" onclick="openPreview()">プレビュー ＆ 調整</button>
     </div>
 
     <div class="edit-preview-area">
@@ -148,7 +148,7 @@
             </div>
 
             <label style="margin-top: 20px;">二つ名 (肩書き)</label>
-            <input type="text" id="subName" value="片翼の天使">
+            <input type="text" id="subName" value="">
             <div class="color-row">
                 <label>文字色</label><input type="color" id="subColor" value="#000000">
                 <label>縁色</label><input type="color" id="subBorder" value="#ffffff">
@@ -159,7 +159,7 @@
             <div class="section-box box-accent">
                 <label>技1</label>
                 <div style="display:flex; gap:10px;">
-                    <input type="text" id="s1Name" value="八刀一閃" style="flex:2">
+                    <input type="text" id="s1Name" value="" style="flex:2">
                     <input type="number" id="s1Dmg" value="500" style="flex:1">
                 </div>
                 <div class="color-row">
@@ -167,12 +167,12 @@
                     <label>縁</label><input type="color" id="s1Border" value="#ffffff">
                     <label>説明</label><input type="color" id="s1DescColor" value="#000000">
                 </div>
-                <textarea id="s1Desc" rows="2">このカードはいかなる効果を受けず、手札にいる時はダメージを受けない</textarea>
+                <textarea id="s1Desc" rows="2"></textarea>
             </div>
             <div class="section-box">
                 <label>技2</label>
                 <div style="display:flex; gap:10px;">
-                    <input type="text" id="s2Name" value="片翼の天使" style="flex:2">
+                    <input type="text" id="s2Name" value="" style="flex:2">
                     <input type="number" id="s2Dmg" value="" style="flex:1">
                 </div>
                 <div class="color-row">
@@ -180,12 +180,12 @@
                     <label>縁</label><input type="color" id="s2Border" value="#ffffff">
                     <label>説明</label><input type="color" id="s2DescColor" value="#000000">
                 </div>
-                <textarea id="s2Desc" rows="2">このカードに無効化や無視は通用しない</textarea>
+                <textarea id="s2Desc" rows="2"></textarea>
             </div>
             <div class="section-box">
                 <label>技3</label>
                 <div style="display:flex; gap:10px;">
-                    <input type="text" id="s3Name" value="スーパーノヴァ" style="flex:2">
+                    <input type="text" id="s3Name" value="" style="flex:2">
                     <input type="number" id="s3Dmg" value="9999" style="flex:1">
                 </div>
                 <div class="color-row">
@@ -193,7 +193,7 @@
                     <label>縁</label><input type="color" id="s3Border" value="#ffffff">
                     <label>説明</label><input type="color" id="s3DescColor" value="#000000">
                 </div>
-                <textarea id="s3Desc" rows="2">相手のHPを１にする</textarea>
+                <textarea id="s3Desc" rows="2"></textarea>
             </div>
             <div class="section-box">
                 <label>技4</label>
@@ -212,7 +212,7 @@
 
         <div id="tab-status" class="control-section">
             <label>ステータスメッセージ (フレーバーテキスト)</label>
-            <input type="text" id="statusMsg" value="絶望を贈ろうーーー">
+            <input type="text" id="statusMsg" value="">
             <div class="color-row">
                 <label>文字色</label><input type="color" id="statusColor" value="#ffffff">
                 <label>縁色</label><input type="color" id="statusBorder" value="#000000">
@@ -229,7 +229,7 @@
         </div>
 
         <div id="tab-assets" class="control-section">
-            <label>📷 メイン画像 (キャラ画像)</label>
+            <label>メイン画像 (キャラ画像)</label>
             <input type="file" id="uploadImage" accept="image/*" style="background:#222; border-color:var(--accent);">
             <hr style="border-top:1px solid #444; margin:20px 0;">
             
@@ -262,8 +262,8 @@
         <div id="padContainer">
             <div class="history-bar">
                 <button class="btn-history btn-undo" onclick="undoLayout()">↩ 戻す</button>
-                <button class="btn-history btn-reset-single" onclick="resetCurrentLayout()">🔄 選択リセット</button>
-                <button class="btn-history btn-reset-all" onclick="resetAllLayout()">⚠️ 全リセット</button>
+                <button class="btn-history btn-reset-single" onclick="resetCurrentLayout()">選択リセット</button>
+                <button class="btn-history btn-reset-all" onclick="resetAllLayout()">全リセット</button>
             </div>
 
             <select id="targetSelect" style="margin-bottom: 15px;">
@@ -308,9 +308,9 @@
         </div>
 
         <div class="bottom-actions">
-            <button id="btnExpandToggle" class="btn-action" onclick="toggleExpandMode()">🔲 拡大</button>
-            <button id="btnLockToggle" class="btn-action" onclick="toggleLockMode()" style="background:#2e7d32; border-color:#4caf50;">👆 自動選択ON</button>
-            <button class="btn-dl-layout" onclick="downloadCard()">📸 保存</button>
+            <button id="btnExpandToggle" class="btn-action" onclick="toggleExpandMode()">拡大</button>
+            <button id="btnLockToggle" class="btn-action" onclick="toggleLockMode()" style="background:#2e7d32; border-color:#4caf50;">自動選択ON</button>
+            <button class="btn-dl-layout" onclick="downloadCard()">保存</button>
         </div>
     </div>
 </div>
@@ -343,9 +343,9 @@
         const pad = document.getElementById('padContainer');
         const btn = document.getElementById('btnExpandToggle');
         if(isExpanded) {
-            modal.classList.add('expanded-mode'); pad.style.display = 'none'; btn.innerHTML = '🔽 パッド';
+            modal.classList.add('expanded-mode'); pad.style.display = 'none'; btn.innerHTML = 'パッド';
         } else {
-            modal.classList.remove('expanded-mode'); pad.style.display = 'block'; btn.innerHTML = '🔲 拡大';
+            modal.classList.remove('expanded-mode'); pad.style.display = 'block'; btn.innerHTML = '拡大';
         }
     }
 
@@ -354,9 +354,9 @@
         isLockMode = !isLockMode;
         const btn = document.getElementById('btnLockToggle');
         if(isLockMode) {
-            btn.innerHTML = '🎯 選択固定ON'; btn.style.background = '#e67e22'; btn.style.borderColor = '#d35400';
+            btn.innerHTML = '選択固定ON'; btn.style.background = '#e67e22'; btn.style.borderColor = '#d35400';
         } else {
-            btn.innerHTML = '👆 自動選択ON'; btn.style.background = '#2e7d32'; btn.style.borderColor = '#4caf50';
+            btn.innerHTML = '自動選択ON'; btn.style.background = '#2e7d32'; btn.style.borderColor = '#4caf50';
         }
     }
 
