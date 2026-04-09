@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Card Maker V44 - Smart UI & Smooth Drag</title>
+    <title>Card Maker V44 - Layout & Push-down Fixed</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,29 +22,24 @@
         html, body { overflow: hidden; width: 100%; height: 100%; margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: 'Noto Sans JP', sans-serif; -webkit-text-size-adjust: 100%; }
         * { box-sizing: border-box; }
 
-        /* ズーム防止 */
         button, input, select, textarea { touch-action: manipulation; }
 
         .app-wrapper { display: flex; flex-direction: column; height: 100dvh; width: 100%; }
 
-        /* ▼ ヘッダー ▼ */
         .header { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; background: #111; border-bottom: 2px solid var(--accent); flex-shrink: 0; }
         .header h1 { margin: 0; font-family: 'Dela Gothic One', sans-serif; color: var(--accent); font-size: 1.15rem; text-shadow: 0 0 10px rgba(0, 212, 255, 0.4); }
         .btn-preview-open { background: linear-gradient(135deg, #0099ff, #00d4ff); color: #000; border: none; padding: 8px 16px; font-weight: 900; font-family: 'Noto Sans JP', sans-serif; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 10px rgba(0, 212, 255, 0.4); font-size: 0.85rem; }
         .btn-preview-open:active { transform: scale(0.95); }
 
-        /* ▼ 編集画面用プレビュー ▼ */
         .edit-preview-area { background: var(--bg); padding: 15px 0; text-align: center; border-bottom: 1px solid var(--border); flex-shrink: 0; }
         .edit-canvas-wrapper { border: 2px solid #555; border-radius: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.8); background-color: transparent; max-width: 90%; max-height: 36vh; width: auto; height: auto; object-fit: contain; display: block; margin: 0 auto; pointer-events: none; }
 
-        /* ▼ メニューバー ▼ */
         .tab-menu { display: flex; overflow-x: auto; background: #1a1a1a; border-bottom: 1px solid var(--border); -webkit-overflow-scrolling: touch; flex-shrink: 0; }
         .tab-menu::-webkit-scrollbar { display: none; }
         .tab-menu { -ms-overflow-style: none; scrollbar-width: none; }
         .tab-menu button { flex: 0 0 auto; padding: 14px 18px; background: transparent; color: #888; border: none; font-size: 0.95rem; font-weight: bold; cursor: pointer; white-space: nowrap; transition: 0.2s; }
         .tab-menu button.active { color: #fff; border-bottom: 3px solid var(--accent); }
 
-        /* ▼ コンテンツエリア ▼ */
         .controls-container { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 20px 15px 40px 15px; background: var(--bg); }
         .control-section { display: none; animation: fadeIn 0.2s ease; }
         .control-section.active { display: block; }
@@ -78,6 +73,7 @@
 
         .layout-controls { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 15px; background: var(--panel); border-radius: 12px 12px 0 0; display: flex; flex-direction: column;}
         
+        /* ▼ 履歴・リセットボタン群（絵文字削除でプロ仕様に） ▼ */
         .history-bar { display: flex; gap: 8px; margin-bottom: 15px; }
         .btn-history { flex: 1; color: #fff; border: 1px solid #555; padding: 10px 5px; border-radius: 8px; font-size: 0.8rem; font-weight: bold; cursor: pointer; white-space: nowrap; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
         .btn-undo { background: linear-gradient(135deg, #2ecc71, #27ae60); border-color: #27ae60; }
@@ -100,8 +96,7 @@
         .btn-dl-layout { flex: 1; padding: 10px; background: linear-gradient(135deg, #ff4757, #ff6b81); color: #fff; border: none; font-weight: 900; font-family: 'Noto Sans JP', sans-serif; font-size: 1.05rem; border-radius: 8px; cursor: pointer; text-shadow: 1px 1px 3px rgba(0,0,0,0.5); box-shadow: 0 4px 15px rgba(255, 71, 87, 0.4); }
         .btn-dl-layout:active { transform: translateY(3px); box-shadow: 0 2px 10px rgba(255, 71, 87, 0.4); }
 
-        /* ▼ モード切替の装飾（絵文字なし） ▼ */
-        .layout-top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; gap: 10px; }
+        .layout-top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 10px; }
         .mode-switch { display: flex; gap: 10px; background: #000; padding: 10px; border-radius: 8px; border: 1px solid var(--accent); flex: 1; }
         .mode-switch label { margin: 0; flex: 1; font-size: 0.8rem; color: #fff; display: flex; align-items: center; gap: 3px; cursor: pointer; justify-content: center; }
         .mode-switch input[type="radio"] { width: 16px; height: 16px; margin: 0; accent-color: var(--accent); }
@@ -249,6 +244,7 @@
                 <div style="flex:1; min-width:85px;"><label>レア3</label><select id="rarity3Select" onchange="changeAsset('rarity3', 'rarity')"></select></div>
             </div>
         </div>
+
     </div>
 </div>
 
@@ -267,13 +263,13 @@
         <div id="padContainer">
             <div class="layout-top-bar">
                 <div class="mode-switch">
-                    <label><input type="radio" name="dragMode" value="dropdown"> リスト連動</label>
-                    <label><input type="radio" name="dragMode" value="direct" checked> 直接タッチ</label>
+                    <label><input type="radio" name="dragMode" value="dropdown">リスト連動</label>
+                    <label><input type="radio" name="dragMode" value="direct" checked>直接タッチ</label>
                 </div>
             </div>
             
             <div class="history-bar">
-                <button class="btn-history btn-undo" onclick="undoLayout()">↩ 戻す</button>
+                <button class="btn-history btn-undo" onclick="undoLayout()">戻す</button>
                 <button class="btn-history btn-reset-single" onclick="resetCurrentLayout()">選択リセット</button>
                 <button class="btn-history btn-reset-all" onclick="resetAllLayout()">全リセット</button>
             </div>
@@ -306,7 +302,7 @@
         </div>
 
         <div class="bottom-actions">
-            <button id="btnExpandToggle" class="btn-action" onclick="toggleExpandMode()">拡大モード</button>
+            <button id="btnExpandToggle" class="btn-action" onclick="toggleExpandMode()">拡大</button>
             <button id="btnLockToggle" class="btn-action" onclick="toggleLockMode()" style="background:#2e7d32; border-color:#4caf50;">自動選択ON</button>
             <button class="btn-dl-layout" onclick="downloadCard()">スマホに保存</button>
         </div>
@@ -343,7 +339,7 @@
         if(isExpanded) {
             modal.classList.add('expanded-mode'); pad.style.display = 'none'; btn.innerHTML = 'パッド表示';
         } else {
-            modal.classList.remove('expanded-mode'); pad.style.display = 'block'; btn.innerHTML = '拡大モード';
+            modal.classList.remove('expanded-mode'); pad.style.display = 'block'; btn.innerHTML = '拡大';
         }
     }
 
@@ -360,8 +356,9 @@
 
     const assets = {
         rarity: [
-            { name: "なし", path: "" }, { name: "★1",  path: "rarity1.png" }, { name: "★2",  path: "rarity2.png" }, 
-            { name: "★3",  path: "rarity3.png" }, { name: "★4",  path: "rarity4.png" }, { name: "★5",  path: "rarity5.png" },
+            { name: "なし", path: "" },
+            { name: "★1",  path: "rarity1.png" }, { name: "★2",  path: "rarity2.png" }, { name: "★3",  path: "rarity3.png" },
+            { name: "★4",  path: "rarity4.png" }, { name: "★5",  path: "rarity5.png" },
         ],
         attr: [
             { name: "なし", path: "" }, { name: "火",   path: "1.png" }, { name: "水",   path: "2.png" }, { name: "風",   path: "3.png" },
@@ -370,9 +367,10 @@
             { name: "龍",   path: "12.png" }, { name: "謎",   path: "13.png" }, { name: "毒",   path: "14.png" }, { name: "無",   path: "15.png" },
         ],
         frame: [
-            { name: "なし", path: "" }, { name: "黄色1", path: "./frame8.png" }, { name: "黄色2", path: "./frame2.png" }, 
-            { name: "赤色", path: "./frame3.png" }, { name: "青色", path: "./frame1.png" }, { name: "緑色", path: "./frame4.png" }, 
-            { name: "紫色", path: "./frame5.png" }, { name: "ピンク色", path: "./frame6.png" }, { name: "黒色", path: "./frame7.png" }
+            { name: "なし", path: "" },
+            { name: "黄色1", path: "./frame8.png" }, { name: "黄色2", path: "./frame2.png" }, { name: "赤色", path: "./frame3.png" },
+            { name: "青色", path: "./frame1.png" }, { name: "緑色", path: "./frame4.png" }, { name: "紫色", path: "./frame5.png" },
+            { name: "ピンク色", path: "./frame6.png" }, { name: "黒色", path: "./frame7.png" }
         ]
     };
 
@@ -380,6 +378,7 @@
     const layoutCanvas = document.getElementById('layoutCanvas');
     const currentImages = { user: null, frame: null, rarity1: null, rarity2: null, rarity3: null, attr: null };
 
+    // ▼ フォントサイズを大きくし、初期Y座標を上に詰めました ▼
     const elements = {
         image:      { x: 0, y: 0, scale: 1.0 },
         frame:      { x: -300, y: -435, scale: 2.0 }, 
@@ -390,11 +389,11 @@
         rarity3:    { x: 30, y: 230, scale: 1.0 }, 
         attr:       { x: 515, y: 25, scale: 0.8 }, 
         skills_all: { x: 0, y: 0, scale: 1.0 },      
-        skill1:     { x: 40, y: 470, scale: 1.0 }, 
-        skill2:     { x: 40, y: 565, scale: 1.0 },  
-        skill3:     { x: 40, y: 660, scale: 1.0 },
-        skill4:     { x: 40, y: 755, scale: 1.0 },
-        statusMsg:  { x: 40, y: 845, scale: 1.0 },   
+        skill1:     { x: 40, y: 440, scale: 1.0 }, 
+        skill2:     { x: 40, y: 535, scale: 1.0 },  
+        skill3:     { x: 40, y: 630, scale: 1.0 },
+        skill4:     { x: 40, y: 725, scale: 1.0 },
+        statusMsg:  { x: 40, y: 820, scale: 1.0 },   
         hp:         { x: 570, y: 830, scale: 1.0 } 
     };
 
@@ -486,7 +485,6 @@
     }
     function closeCropModal() { cropModal.style.display = 'none'; if(cropper) { cropper.destroy(); cropper = null; } document.getElementById('uploadImage').value = ''; }
 
-    // 全入力フィールドで即座に反映させる
     document.querySelectorAll('input:not(#uploadImage), select:not(#targetSelect), textarea').forEach(el => {
         if(el.type !== 'range' && el.type !== 'radio' && !el.classList.contains('btn-step') && el.id !== 'numX' && el.id !== 'numY' && el.id !== 'numScale') { 
             el.addEventListener('input', drawCard); 
@@ -527,10 +525,14 @@
         const el = elements[currentTarget];
         sliderX.value = el.x; numX.value = el.x; sliderY.value = el.y; numY.value = el.y;
         const sc = Math.round(el.scale * 100); sliderScale.value = sc; numScale.value = sc;
-        document.getElementById('targetSelect').value = currentTarget;
+        
+        const selectEl = document.getElementById('targetSelect');
+        if(selectEl.querySelector(`option[value="${currentTarget}"]`)) {
+            selectEl.value = currentTarget;
+        }
     }
 
-    // ▼ スマート・レイアウト選択（使用中のみ表示） ▼
+    // ▼ 使用中の項目だけをプルダウンに表示する機能 ▼
     function updateTargetSelectOptions() {
         const selectEl = document.getElementById('targetSelect');
         if(!selectEl) return;
@@ -539,8 +541,8 @@
         
         if (currentImages.user) options.push({ val: 'image', text: 'メイン画像' });
         if (currentImages.frame) options.push({ val: 'frame', text: 'フレーム画像' });
-        if (document.getElementById('cardName').value.trim() !== '') options.push({ val: 'name', text: 'カード名' });
         if (document.getElementById('subName').value.trim() !== '') options.push({ val: 'subName', text: '二つ名' });
+        if (document.getElementById('cardName').value.trim() !== '') options.push({ val: 'name', text: 'カード名' });
         if (currentImages.rarity1) options.push({ val: 'rarity1', text: 'レアリティ 1' });
         if (currentImages.rarity2) options.push({ val: 'rarity2', text: 'レアリティ 2' });
         if (currentImages.rarity3) options.push({ val: 'rarity3', text: 'レアリティ 3' });
@@ -616,7 +618,6 @@
     function getPointerPos(e) { return (e.touches && e.touches.length > 0) ? { x: e.touches[0].clientX, y: e.touches[0].clientY } : { x: e.clientX, y: e.clientY }; }
 
     function startDrag(e) {
-        // ▼ スクロールを止めてドラッグ操作を安定させる ▼
         if (e.type === 'touchstart' && e.cancelable) e.preventDefault(); 
         
         const pos = getPointerPos(e);
@@ -625,15 +626,16 @@
         const cx = (pos.x - rect.left) * (layoutCanvas.width / rect.width);
         const cy = (pos.y - rect.top) * (layoutCanvas.height / rect.height);
         
+        // 自動選択ON（固定されていない）時のみ当たり判定を実行
         if (!isLockMode && mode === 'direct') {
             const boxes = getHitBoxes();
             for (let b of boxes) { 
                 if (cx >= b.x && cx <= b.x + b.w && cy >= b.y && cy <= b.y + b.h) { 
                     let target = b.id;
+                    // まとめて移動の判定
                     if (target.startsWith('skill') && document.getElementById('targetSelect').value === 'skills_all') {
                         target = 'skills_all';
                     }
-                    // そのパーツが非表示（選択肢にない）場合は無視する
                     const selectEl = document.getElementById('targetSelect');
                     if(selectEl.querySelector(`option[value="${target}"]`)) {
                         currentTarget = target; 
@@ -664,7 +666,7 @@
     window.addEventListener('mouseup', endDrag); window.addEventListener('touchend', endDrag);
     window.addEventListener('touchcancel', endDrag); window.addEventListener('blur', endDrag);
 
-    // ▼ 文字の自動改行・押し出し描画システム ▼
+    // ▼ 自動改行・自動押し出し描画 ▼
     function renderWrappedText(ctx, text, x, y, maxWidth, lineHeight, action = 'draw') {
         if (!text) return 0;
         const lines = text.split('\n'); let cursorY = y;
@@ -743,7 +745,6 @@
             ctx.drawImage(currentImages.attr, 0, 0, 80, 80); ctx.restore();
         }
 
-        // ▼ 技の自動押し出し計算＆描画 ▼
         const group = elements.skills_all; 
         let currentPushDown = 0; 
 
@@ -763,7 +764,7 @@
             let nameUsedHeight = drawKillgoText(ctx, name, 0, 0, 42, document.getElementById('s' + i + 'Color').value, document.getElementById('s' + i + 'Border').value, "left", Math.max(100, 600 - actualX - 100)); 
             if(dmg) drawKillgoText(ctx, dmg, 520, 0, 44, document.getElementById('s' + i + 'Color').value, document.getElementById('s' + i + 'Border').value, "right");
             
-            let descStartY = Math.max(50, nameUsedHeight + 5);
+            let descStartY = Math.max(48, nameUsedHeight + 5);
             let descUsedHeight = 0;
             if(desc) { descUsedHeight = drawDescText(ctx, desc, 0, descStartY, Math.max(100, 600 - actualX - 30), 30, 24, document.getElementById('s' + i + 'DescColor').value, "#ffffff", false, 0.12); }
             ctx.restore();
@@ -771,7 +772,8 @@
             let totalBlockHeight = descStartY + descUsedHeight;
             window.hitBoxHeights['skill' + i] = totalBlockHeight;
 
-            let standardHeight = 85;
+            // ▼ 押し出し計算の基準を95pxにして余白を確保 ▼
+            let standardHeight = 95;
             if(totalBlockHeight > standardHeight) { currentPushDown += (totalBlockHeight - standardHeight); }
         }
 
@@ -796,7 +798,6 @@
         eCtx.clearRect(0, 0, editCanvas.width, editCanvas.height);
         eCtx.drawImage(layoutCanvas, 0, 0);
         
-        // ▼ 最後にプルダウンを使用中のみに更新 ▼
         updateTargetSelectOptions();
     }
 
