@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Card Maker V42 - Ultimate Pro Edition</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Noto+Sans+JP:wght@700;900&display=swap" rel="stylesheet">
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
+    <style>
+        /* ▼ フォント設定 ▼ */
+        @font-face { font-family: 'KillgoWeb'; src: url('./GN-KillGothic-U-KanaNA.ttf') format('truetype'); }
+        @font-face { font-family: 'NotoSansJPThin'; src: url('./NotoSansJP-Thin[1].otf') format('opentype'); }
+
+        :root { --accent: #00d4ff; --bg: #001f3f; --panel: #1a1a1a; --text: #eee; --border: #333; }
+        
+        html, body { overflow: hidden; width: 100%; height: 100%; margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: 'Noto Sans JP', sans-serif; -webkit-text-size-adjust: 100%; }
+        * { box-sizing: border-box; }
+
+        /* ズーム防止（iPhone特有のダブルタップズームを防ぐ） */
+        button, input, select, textarea { touch-action: manipulation; }
+
+        .app-wrapper { display: flex; flex-direction: column; height: 100dvh; width: 100%; }
+
+        /* ▼ ヘッダー ▼ */
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; background: #111; border-bottom: 2px solid var(--accent); flex-shrink: 0; }
+        .header h1 { margin: 0; font-family: 'Dela Gothic One', sans-serif; color: var(--accent); font-size: 1.15rem; text-shadow: 0 0 10px rgba(0, 212, 255, 0.4); }
+        .btn-preview-open { background: linear-gradient(135deg, #0099ff, #00d4ff); color: #000; border: none; padding: 8px 16px; font-weight: 900; font-family: 'Noto Sans JP', sans-serif; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 10px rgba(0, 212, 255, 0.4); font-size: 0.85rem; }
+        .btn-preview-open:active { transform: scale(0.95); }
+
+        /* ▼ 編集画面用プレビュー ▼ */
+        .edit-preview-area { background: var(--bg); padding: 15px 0; text-align: center; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+        .edit-canvas-wrapper { border: 2px solid #555; border-radius: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.8); background-color: transparent; max-width: 90%; max-height: 36vh; width: auto; height: auto; object-fit: contain; display: block; margin: 0 auto; pointer-events: none; }
+
+        /* ▼ メニューバー ▼ */
+        .tab-menu { display: flex; overflow-x: auto; background: #1a1a1a; border-bottom: 1px solid var(--border); -webkit-overflow-scrolling: touch; flex-shrink: 0; }
+        .tab-menu::-webkit-scrollbar { display: none; }
+        .tab-menu { -ms-overflow-style: none; scrollbar-width: none; }
+        .tab-menu button { flex: 0 0 auto; padding: 14px 18px; background: transparent; color: #888; border: none; font-size: 0.95rem; font-weight: bold; cursor: pointer; white-space: nowrap; transition: 0.2s; }
+        .tab-menu button.active { color: #fff; border-bottom: 3px solid var(--accent); }
+
+        /* ▼ コンテンツエリア ▼ */
+        .controls-container { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 20px 15px 40px 15px; background: var(--bg); }
+        .control-section { display: none; animation: fadeIn 0.2s ease; }
+        .control-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        label { display: block; font-size: 0.9rem; color: #ccc; margin-bottom: 6px; font-weight: bold; }
+        input[type="text"], input[type="number"], select, textarea { width: 100%; padding: 14px; margin-bottom: 12px; background: #111; border: 1px solid #444; color: #fff; border-radius: 8px; font-family: 'Noto Sans JP', sans-serif; font-size: 1rem; }
+        input:focus, textarea:focus, select:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 5px rgba(0, 212, 255, 0.5); }
+        .color-row { display: flex; gap: 8px; align-items: center; margin-bottom: 15px; background: #1a1a1a; padding: 10px; border-radius: 8px; flex-wrap: wrap; border: 1px solid #333; }
+        .color-row label { margin: 0; font-size: 0.85em; white-space: nowrap; }
+        input[type="color"] { width: 40px; height: 40px; border: none; background: none; cursor: pointer; padding: 0; margin-right: 5px; }
+        .section-box { margin-bottom: 25px; border-left: 4px solid #666; padding-left: 12px; background: #111; padding: 15px; border-radius: 0 8px 8px 0;}
+        .box-accent { border-left-color: var(--accent); }
+
+        /* ========================================================== */
+        /* ▼ プレビュー＆配置調整モーダル ▼ */
+        /* ========================================================== */
+        #previewModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100dvh; background: var(--bg); z-index: 2000; flex-direction: column; }
+        
+        .preview-header { display: grid; grid-template-columns: 80px 1fr 80px; align-items: center; padding: 12px 15px; background: #111; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+        .btn-back { background: #444; color: #fff; border: none; padding: 8px 10px; border-radius: 8px; font-weight: bold; font-size: 0.85rem; cursor: pointer; width: fit-content; margin: 0; }
+        .btn-back:active { background: #666; }
+        .preview-title { font-weight: bold; color: var(--accent); margin: 0; font-size: 1rem; text-align: center; white-space: nowrap; }
+
+        .canvas-area { padding: 15px 0; text-align: center; background: #0b1120; flex-shrink: 0; transition: 0.3s; }
+        .layout-canvas-wrapper { border: 2px solid #555; border-radius: 20px; box-shadow: 0 5px 25px rgba(0,0,0,0.9); background-color: transparent; max-width: 95%; max-height: 40vh; width: auto; height: auto; object-fit: contain; cursor: grab; touch-action: none; display: block; margin: 0 auto; transition: max-height 0.3s; }
+        .layout-canvas-wrapper:active { cursor: grabbing; }
+
+        #previewModal.expanded-mode .layout-canvas-wrapper { max-height: 65vh; }
+        #previewModal.expanded-mode .canvas-area { padding: 10px 0; }
+
+        .layout-controls { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 15px; background: var(--panel); border-radius: 12px 12px 0 0; display: flex; flex-direction: column;}
+        
+        /* ▼ リセットボタン群（３つ並び） ▼ */
+        .history-bar { display: flex; gap: 8px; margin-bottom: 15px; }
+        .btn-history { flex: 1; color: #fff; border: 1px solid #555; padding: 10px 5px; border-radius: 8px; font-size: 0.8rem; font-weight: bold; cursor: pointer; white-space: nowrap; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
+        .btn-undo { background: linear-gradient(135deg, #2ecc71, #27ae60); border-color: #27ae60; }
+        .btn-undo:active { background: #27ae60; }
+        .btn-reset-single { background: linear-gradient(135deg, #e67e22, #d35400); border-color: #d35400; }
+        .btn-reset-single:active { background: #d35400; }
+        .btn-reset-all { background: linear-gradient(135deg, #e74c3c, #c0392b); border-color: #c0392b; }
+        .btn-reset-all:active { background: #c0392b; }
+
+        /* 微調整ボタン群 */
+        .range-group { display: flex; align-items: center; gap: 6px; margin-bottom: 12px; font-size: 0.95em; }
+        .range-group label { width: 35px; margin: 0; color: #aaa; font-size: 0.85rem;}
+        input[type="range"] { flex: 1; cursor: pointer; accent-color: var(--accent); margin: 0; padding: 0; background: transparent; border: none; }
+        .num-input { width: 65px !important; margin: 0 !important; text-align: center; padding: 8px 5px !important; font-family: monospace; font-size: 0.95rem; }
+        /* ズーム防止特化クラス */
+        .btn-step { background: #333; color: #fff; border: 1px solid #555; border-radius: 6px; width: 34px; height: 34px; font-size: 1.2rem; font-weight: bold; display: flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+        .btn-step:active { background: var(--accent); color: #000; border-color: var(--accent); }
+
+        /* 下部アクションバー */
+        .bottom-actions { display: flex; gap: 8px; margin-top: auto; padding-top: 10px; padding-bottom: 15px;}
+        .btn-action { flex: 0 0 auto; background: #333; color: #fff; border: 1px solid #555; border-radius: 8px; font-weight: bold; padding: 10px; font-size: 0.85rem; font-family: 'Noto Sans JP', sans-serif; box-shadow: 0 4px 10px rgba(0,0,0,0.3); transition: 0.2s;}
+        .btn-action:active { transform: scale(0.95); }
+        .btn-dl-layout { flex: 1; padding: 10px; background: linear-gradient(135deg, #ff4757, #ff6b81); color: #fff; border: none; font-weight: 900; font-family: 'Noto Sans JP', sans-serif; font-size: 1.05rem; border-radius: 8px; cursor: pointer; text-shadow: 1px 1px 3px rgba(0,0,0,0.5); box-shadow: 0 4px 15px rgba(255, 71, 87, 0.4); }
+        .btn-dl-layout:active { transform: translateY(3px); box-shadow: 0 2px 10px rgba(255, 71, 87, 0.4); }
+
+        /* トリミングモーダル */
+        #cropModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.95); z-index: 9999; flex-direction: column; align-items: center; justify-content: center; }
+        .crop-container { width: 95%; max-height: 70vh; background: #000; margin-bottom: 20px; border-radius: 8px; overflow: hidden; }
+        .crop-container img { max-width: 100%; display: block; }
+        .crop-btns { display: flex; gap: 15px; width: 90%; }
+        .crop-btns button { flex: 1; padding: 15px; font-size: 1.1rem; font-weight: bold; border-radius: 8px; border: none; cursor: pointer; }
+        .btn-crop-ok { background: var(--accent); color: #000; }
+        .btn-crop-cancel { background: #555; color: #fff; }
+    </style>
+</head>
+<body>
+
+<div style="font-family: 'KillgoWeb'; visibility: hidden; position: absolute;">キルゴ</div>
+<div style="font-family: 'NotoSansJPThin'; visibility: hidden; position: absolute;">極細</div>
+
+<div class="app-wrapper">
+
+    <div class="header">
+        <h1>CARD MAKER</h1>
+        <button class="btn-preview-open" onclick="openPreview()">👁️ プレビュー ＆ 調整</button>
+    </div>
+
+    <div class="edit-preview-area">
+        <canvas id="editCanvas" width="600" height="870" class="edit-canvas-wrapper"></canvas>
+    </div>
+
+    <div class="tab-menu">
+        <button class="tab-btn" onclick="switchTab('tab-text')" id="btn-tab-text">カード名＆二つ名</button>
+        <button class="tab-btn" onclick="switchTab('tab-skills')" id="btn-tab-skills">技・スキル</button>
+        <button class="tab-btn" onclick="switchTab('tab-status')" id="btn-tab-status">ステータス＆HP</button>
+        <button class="tab-btn" onclick="switchTab('tab-assets')" id="btn-tab-assets">素材選択</button>
+    </div>
+
+    <div class="controls-container">
+
+        <div id="tab-text" class="control-section">
+            <label>カード名</label>
+            <div style="display:flex; gap:10px; margin-bottom: 10px;">
+                <input type="text" id="cardName" value="セフィロス" style="flex:2; margin:0;">
+                <select id="cardNameSize" style="flex:1; margin:0;">
+                    <option value="large" selected>大</option>
+                    <option value="medium">中</option>
+                    <option value="small">小</option>
+                </select>
+            </div>
+            <div class="color-row">
+                <label>文字色</label><input type="color" id="nameColor" value="#000000">
+                <label>縁色</label><input type="color" id="nameBorder" value="#ffffff">
+            </div>
+
+            <label style="margin-top: 20px;">二つ名 (肩書き)</label>
+            <input type="text" id="subName" value="片翼の天使">
+            <div class="color-row">
+                <label>文字色</label><input type="color" id="subColor" value="#000000">
+                <label>縁色</label><input type="color" id="subBorder" value="#ffffff">
+            </div>
+        </div>
+
+        <div id="tab-skills" class="control-section">
+            <div class="section-box box-accent">
+                <label>技1</label>
+                <div style="display:flex; gap:10px;">
+                    <input type="text" id="s1Name" value="八刀一閃" style="flex:2">
+                    <input type="number" id="s1Dmg" value="500" style="flex:1">
+                </div>
+                <div class="color-row">
+                    <label>技</label><input type="color" id="s1Color" value="#000000">
+                    <label>縁</label><input type="color" id="s1Border" value="#ffffff">
+                    <label>説明</label><input type="color" id="s1DescColor" value="#000000">
+                </div>
+                <textarea id="s1Desc" rows="2">このカードはいかなる効果を受けず、手札にいる時はダメージを受けない</textarea>
+            </div>
+            <div class="section-box">
+                <label>技2</label>
+                <div style="display:flex; gap:10px;">
+                    <input type="text" id="s2Name" value="片翼の天使" style="flex:2">
+                    <input type="number" id="s2Dmg" value="" style="flex:1">
+                </div>
+                <div class="color-row">
+                    <label>技</label><input type="color" id="s2Color" value="#000000">
+                    <label>縁</label><input type="color" id="s2Border" value="#ffffff">
+                    <label>説明</label><input type="color" id="s2DescColor" value="#000000">
+                </div>
+                <textarea id="s2Desc" rows="2">このカードに無効化や無視は通用しない</textarea>
+            </div>
+            <div class="section-box">
+                <label>技3</label>
+                <div style="display:flex; gap:10px;">
+                    <input type="text" id="s3Name" value="スーパーノヴァ" style="flex:2">
+                    <input type="number" id="s3Dmg" value="9999" style="flex:1">
+                </div>
+                <div class="color-row">
+                    <label>技</label><input type="color" id="s3Color" value="#000000">
+                    <label>縁</label><input type="color" id="s3Border" value="#ffffff">
+                    <label>説明</label><input type="color" id="s3DescColor" value="#000000">
+                </div>
+                <textarea id="s3Desc" rows="2">相手のHPを１にする</textarea>
+            </div>
+            <div class="section-box">
+                <label>技4</label>
+                <div style="display:flex; gap:10px;">
+                    <input type="text" id="s4Name" value="" style="flex:2">
+                    <input type="number" id="s4Dmg" value="" style="flex:1">
+                </div>
+                <div class="color-row">
+                    <label>技</label><input type="color" id="s4Color" value="#000000">
+                    <label>縁</label><input type="color" id="s4Border" value="#ffffff">
+                    <label>説明</label><input type="color" id="s4DescColor" value="#000000">
+                </div>
+                <textarea id="s4Desc" rows="2"></textarea>
+            </div>
+        </div>
+
+        <div id="tab-status" class="control-section">
+            <label>ステータスメッセージ (フレーバーテキスト)</label>
+            <input type="text" id="statusMsg" value="絶望を贈ろうーーー">
+            <div class="color-row">
+                <label>文字色</label><input type="color" id="statusColor" value="#ffffff">
+                <label>縁色</label><input type="color" id="statusBorder" value="#000000">
+            </div>
+            
+            <label>HP設定</label>
+            <div style="display:flex; gap:10px;">
+                <input type="number" id="hpVal" value="800" style="flex:2">
+                <div style="display:flex; align-items:center; background:#111; padding:0 10px; border-radius:8px; border:1px solid #444;">
+                    <label style="margin:0; margin-right:10px; font-size:0.8em;">数値色</label>
+                    <input type="color" id="hpNumColor" value="#ffffff">
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-assets" class="control-section">
+            <label>📷 メイン画像 (キャラ画像)</label>
+            <input type="file" id="uploadImage" accept="image/*" style="background:#222; border-color:var(--accent);">
+            <hr style="border-top:1px solid #444; margin:20px 0;">
+            
+            <div style="display:flex; gap:10px; margin-bottom:15px;">
+                <div style="flex:1;"><label>フレーム</label><select id="frameSelect" onchange="changeAsset('frame')"></select></div>
+                <div style="flex:1;"><label>属性</label><select id="attrSelect" onchange="changeAsset('attr')"></select></div>
+            </div>
+            <div style="display:flex; gap:10px; overflow-x:auto;">
+                <div style="flex:1; min-width:85px;"><label>レア1</label><select id="rarity1Select" onchange="changeAsset('rarity1', 'rarity')"></select></div>
+                <div style="flex:1; min-width:85px;"><label>レア2</label><select id="rarity2Select" onchange="changeAsset('rarity2', 'rarity')"></select></div>
+                <div style="flex:1; min-width:85px;"><label>レア3</label><select id="rarity3Select" onchange="changeAsset('rarity3', 'rarity')"></select></div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div id="previewModal">
+    <div class="preview-header">
+        <button class="btn-back" onclick="closePreview()">◀ 戻る</button>
+        <div class="preview-title">プレビュー ＆ 配置</div>
+        <div style="width: 70px;"></div> 
+    </div>
+
+    <div class="canvas-area">
+        <canvas id="layoutCanvas" width="600" height="870" class="layout-canvas-wrapper"></canvas>
+    </div>
+
+    <div class="layout-controls">
+        
+        <div id="padContainer">
+            <div class="history-bar">
+                <button class="btn-history btn-undo" onclick="undoLayout()">↩ 戻す</button>
+                <button class="btn-history btn-reset-single" onclick="resetCurrentLayout()">🔄 選択リセット</button>
+                <button class="btn-history btn-reset-all" onclick="resetAllLayout()">⚠️ 全リセット</button>
+            </div>
+
+            <select id="targetSelect">
+                <option value="image">メイン画像</option>
+                <option value="frame">フレーム画像</option>
+                <option value="name">カード名</option>
+                <option value="subName">二つ名</option>
+                <option value="rarity1">レアリティ 1</option>
+                <option value="rarity2">レアリティ 2</option>
+                <option value="rarity3">レアリティ 3</option>
+                <option value="attr">属性画像 (右上)</option>
+                <option value="skills_all" style="font-weight:bold; color:var(--accent);">★ 技1〜4 (まとめて移動)</option>
+                <option value="skill1">技1 (個別微調整)</option>
+                <option value="skill2">技2 (個別微調整)</option>
+                <option value="skill3">技3 (個別微調整)</option>
+                <option value="skill4">技4 (個別微調整)</option>
+                <option value="statusMsg">ステータス (左下)</option>
+                <option value="hp">HP表示</option>
+            </select>
+            
+            <div class="range-group">
+                <label>X</label> 
+                <button type="button" class="btn-step" onclick="adjustValue('x', -1)">-</button>
+                <input type="range" id="posX" min="-600" max="600" value="0"> 
+                <button type="button" class="btn-step" onclick="adjustValue('x', 1)">+</button>
+                <input type="number" id="numX" class="num-input" value="0">
+            </div>
+            <div class="range-group">
+                <label>Y</label> 
+                <button type="button" class="btn-step" onclick="adjustValue('y', -1)">-</button>
+                <input type="range" id="posY" min="-900" max="900" value="0"> 
+                <button type="button" class="btn-step" onclick="adjustValue('y', 1)">+</button>
+                <input type="number" id="numY" class="num-input" value="0">
+            </div>
+            <div class="range-group">
+                <label>倍率</label> 
+                <button type="button" class="btn-step" onclick="adjustValue('scale', -1)">-</button>
+                <input type="range" id="scale" min="10" max="400" value="100"> 
+                <button type="button" class="btn-step" onclick="adjustValue('scale', 1)">+</button>
+                <input type="number" id="numScale" class="num-input" value="100">
+            </div>
+        </div>
+
+        <div class="bottom-actions">
+            <button id="btnExpandToggle" class="btn-action" onclick="toggleExpandMode()">🔲 拡大</button>
+            <button id="btnLockToggle" class="btn-action" onclick="toggleLockMode()" style="background:#2e7d32; border-color:#4caf50;">👆 自動選択ON</button>
+            <button class="btn-dl-layout" onclick="downloadCard()">📸 保存</button>
+        </div>
+        
+    </div>
+</div>
+
+<div id="cropModal">
+    <div style="color: #fff; margin-bottom: 10px; font-weight: bold;">画像をピンチアウトでズーム・移動できます</div>
+    <div class="crop-container"><img id="cropImage" src=""></div>
+    <div class="crop-btns">
+        <button class="btn-crop-cancel" onclick="closeCropModal()">キャンセル</button>
+        <button class="btn-crop-ok" onclick="applyCrop()">切り抜いて適用</button>
+    </div>
+</div>
+
+<script>
+    function switchTab(tabId) {
+        document.querySelectorAll('.control-section').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        document.getElementById('btn-' + tabId).classList.add('active');
+    }
+    switchTab('tab-text');
+
+    function openPreview() { document.getElementById('previewModal').style.display = 'flex'; drawCard(); }
+    function closePreview() { document.getElementById('previewModal').style.display = 'none'; }
+
+    // ▼ 拡大モードと自動選択モード（ターゲット固定機能） ▼
+    let isExpanded = false;
+    function toggleExpandMode() {
+        isExpanded = !isExpanded;
+        const modal = document.getElementById('previewModal');
+        const pad = document.getElementById('padContainer');
+        const btn = document.getElementById('btnExpandToggle');
+        if(isExpanded) {
+            modal.classList.add('expanded-mode'); pad.style.display = 'none'; btn.innerHTML = '🔽 パッド';
+        } else {
+            modal.classList.remove('expanded-mode'); pad.style.display = 'block'; btn.innerHTML = '🔲 拡大';
+        }
+    }
+
+    let isLockMode = false; // true = 固定（自動選択OFF）, false = 自動選択ON
+    function toggleLockMode() {
+        isLockMode = !isLockMode;
+        const btn = document.getElementById('btnLockToggle');
+        if(isLockMode) {
+            btn.innerHTML = '🎯 選択固定ON';
+            btn.style.background = '#e67e22'; // オレンジ
+            btn.style.borderColor = '#d35400';
+        } else {
+            btn.innerHTML = '👆 自動選択ON';
+            btn.style.background = '#2e7d32'; // 緑
+            btn.style.borderColor = '#4caf50';
+        }
+    }
+
+    const assets = {
+        rarity: [
+            { name: "なし", path: "" },
+            { name: "★1",  path: "rarity1.png" }, { name: "★2",  path: "rarity2.png" }, { name: "★3",  path: "rarity3.png" },
+            { name: "★4",  path: "rarity4.png" }, { name: "★5",  path: "rarity5.png" },
+        ],
+        attr: [
+            { name: "なし", path: "" }, { name: "火",   path: "1.png" }, { name: "水",   path: "2.png" }, { name: "風",   path: "3.png" },
+            { name: "木",   path: "4.png" }, { name: "土",   path: "5.png" }, { name: "雷",   path: "6.png" }, { name: "光",   path: "7.png" },
+            { name: "闇",   path: "8.png" }, { name: "氷",   path: "9.png" }, { name: "虹",   path: "10.png" }, { name: "超",   path: "11.png" },
+            { name: "龍",   path: "12.png" }, { name: "謎",   path: "13.png" }, { name: "毒",   path: "14.png" }, { name: "無",   path: "15.png" },
+        ],
+        frame: [
+            { name: "なし", path: "" },
+            { name: "黄色1", path: "./frame8.png" }, { name: "黄色2", path: "./frame2.png" }, { name: "赤色", path: "./frame3.png" },
+            { name: "青色", path: "./frame1.png" }, { name: "緑色", path: "./frame4.png" }, { name: "紫色", path: "./frame5.png" },
+            { name: "ピンク色", path: "./frame6.png" }, { name: "黒色", path: "./frame7.png" }
+        ]
+    };
+
+    const editCanvas = document.getElementById('editCanvas');
+    const layoutCanvas = document.getElementById('layoutCanvas');
+    const currentImages = { user: null, frame: null, rarity1: null, rarity2: null, rarity3: null, attr: null };
+
+    // ▼ 技4を追加し、Y間隔を詰めて4つ入るように調整 ▼
+    const elements = {
+        image:      { x: 0, y: 0, scale: 1.0 },
+        frame:      { x: -300, y: -435, scale: 2.0 }, 
+        subName:    { x: 30, y: 25, scale: 1.0 },    
+        name:       { x: 30, y: 50, scale: 1.0 },  
+        rarity1:    { x: 30, y: 120, scale: 1.0 }, 
+        rarity2:    { x: 30, y: 175, scale: 1.0 }, 
+        rarity3:    { x: 30, y: 230, scale: 1.0 }, 
+        attr:       { x: 515, y: 25, scale: 0.8 }, 
+        skills_all: { x: 0, y: 0, scale: 1.0 },      
+        skill1:     { x: 40, y: 470, scale: 1.0 }, 
+        skill2:     { x: 40, y: 550, scale: 1.0 },  
+        skill3:     { x: 40, y: 630, scale: 1.0 },
+        skill4:     { x: 40, y: 710, scale: 1.0 },
+        statusMsg:  { x: 40, y: 800, scale: 1.0 },   
+        hp:         { x: 570, y: 830, scale: 1.0 } 
+    };
+
+    const defaultElementsStr = JSON.stringify(elements);
+    let historyStack = []; 
+    let currentTarget = 'image';
+
+    function saveHistory() {
+        historyStack.push(JSON.stringify(elements));
+        if(historyStack.length > 20) historyStack.shift(); 
+    }
+
+    function undoLayout() {
+        if(historyStack.length > 0) {
+            const prevState = historyStack.pop();
+            const parsed = JSON.parse(prevState);
+            for(let key in parsed) {
+                elements[key].x = parsed[key].x;
+                elements[key].y = parsed[key].y;
+                elements[key].scale = parsed[key].scale;
+            }
+            updateInputsFromState(); drawCard();
+        } else {
+            alert("これ以上前には戻せません！");
+        }
+    }
+
+    // 選択中のレイヤーのみリセット
+    function resetCurrentLayout() {
+        saveHistory();
+        const defaults = JSON.parse(defaultElementsStr);
+        elements[currentTarget].x = defaults[currentTarget].x;
+        elements[currentTarget].y = defaults[currentTarget].y;
+        elements[currentTarget].scale = defaults[currentTarget].scale;
+        updateInputsFromState(); drawCard();
+    }
+
+    // 全リセット
+    function resetAllLayout() {
+        if(confirm("すべての配置とサイズを初期状態に戻しますか？")) {
+            saveHistory();
+            const defaults = JSON.parse(defaultElementsStr);
+            for(let key in defaults) {
+                elements[key].x = defaults[key].x; elements[key].y = defaults[key].y; elements[key].scale = defaults[key].scale;
+            }
+            updateInputsFromState(); drawCard();
+        }
+    }
+
+    window.onload = function() {
+        createOptions('frameSelect', assets.frame); createOptions('attrSelect', assets.attr);
+        createOptions('rarity1Select', assets.rarity); createOptions('rarity2Select', assets.rarity); createOptions('rarity3Select', assets.rarity);
+        
+        document.getElementById('frameSelect').selectedIndex = 1; 
+        document.getElementById('attrSelect').selectedIndex = 8; 
+        document.getElementById('rarity1Select').selectedIndex = 5; 
+        
+        changeAsset('frame'); changeAsset('attr');
+        changeAsset('rarity1', 'rarity'); changeAsset('rarity2', 'rarity'); changeAsset('rarity3', 'rarity');
+
+        document.fonts.ready.then(() => { updateInputsFromState(); setTimeout(drawCard, 300); });
+    };
+
+    function createOptions(id, list) {
+        const select = document.getElementById(id);
+        list.forEach((item, index) => { const opt = document.createElement('option'); opt.value = index; opt.text = item.name; select.appendChild(opt); });
+    }
+
+    function changeAsset(id, assetGroup) {
+        assetGroup = assetGroup || id; 
+        const index = document.getElementById(id + 'Select').value;
+        const path = assets[assetGroup][index].path;
+        if (!path) { currentImages[id] = null; drawCard(); return; }
+        
+        const img = new Image();
+        if(path.indexOf('http') === 0) { img.crossOrigin = "anonymous"; }
+        img.onload = () => { currentImages[id] = img; drawCard(); };
+        img.src = path;
+    }
+
+    let cropper;
+    const cropModal = document.getElementById('cropModal'), cropImage = document.getElementById('cropImage');
+    document.getElementById('uploadImage').addEventListener('change', function(e) {
+        const file = e.target.files[0]; if(!file) return;
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+            cropImage.src = evt.target.result; cropModal.style.display = 'flex';
+            if(cropper) { cropper.destroy(); }
+            cropper = new Cropper(cropImage, { aspectRatio: 600 / 870, viewMode: 1, dragMode: 'move', autoCropArea: 1, guides: true, center: true, background: false, modal: true });
+        };
+        reader.readAsDataURL(file);
+    });
+
+    function applyCrop() {
+        if (!cropper) return;
+        const croppedCanvas = cropper.getCroppedCanvas({ width: 600, height: 870 });
+        const img = new Image();
+        img.onload = () => { 
+            saveHistory();
+            currentImages.user = img; 
+            elements.image.x = 0; elements.image.y = 0; elements.image.scale = 1.0;
+            if(currentTarget === 'image') updateInputsFromState();
+            drawCard(); 
+        };
+        img.src = croppedCanvas.toDataURL('image/png');
+        closeCropModal();
+    }
+    function closeCropModal() { cropModal.style.display = 'none'; if(cropper) { cropper.destroy(); cropper = null; } document.getElementById('uploadImage').value = ''; }
+
+    // ▼ 即時反映のためのイベント登録 ▼
+    document.querySelectorAll('input:not(#uploadImage), select:not(#targetSelect), textarea').forEach(el => {
+        if(el.type !== 'range' && el.type !== 'radio' && !el.classList.contains('btn-step') && el.id !== 'numX' && el.id !== 'numY' && el.id !== 'numScale') { 
+            el.addEventListener('input', drawCard); 
+        }
+    });
+
+    document.getElementById('targetSelect').addEventListener('change', (e) => { currentTarget = e.target.value; updateInputsFromState(); });
+
+    const sliderX = document.getElementById('posX'), numX = document.getElementById('numX');
+    const sliderY = document.getElementById('posY'), numY = document.getElementById('numY');
+    const sliderScale = document.getElementById('scale'), numScale = document.getElementById('numScale');
+
+    sliderX.addEventListener('mousedown', saveHistory); sliderX.addEventListener('touchstart', saveHistory, {passive: true});
+    sliderY.addEventListener('mousedown', saveHistory); sliderY.addEventListener('touchstart', saveHistory, {passive: true});
+    sliderScale.addEventListener('mousedown', saveHistory); sliderScale.addEventListener('touchstart', saveHistory, {passive: true});
+
+    sliderX.addEventListener('input', (e) => { elements[currentTarget].x = parseInt(e.target.value); numX.value = elements[currentTarget].x; drawCard(); });
+    numX.addEventListener('input', (e) => { elements[currentTarget].x = parseInt(e.target.value); sliderX.value = elements[currentTarget].x; drawCard(); });
+    sliderY.addEventListener('input', (e) => { elements[currentTarget].y = parseInt(e.target.value); numY.value = elements[currentTarget].y; drawCard(); });
+    numY.addEventListener('input', (e) => { elements[currentTarget].y = parseInt(e.target.value); sliderY.value = elements[currentTarget].y; drawCard(); });
+    sliderScale.addEventListener('input', (e) => { elements[currentTarget].scale = parseInt(e.target.value) / 100; numScale.value = parseInt(e.target.value); drawCard(); });
+    numScale.addEventListener('input', (e) => { const val = parseInt(e.target.value); elements[currentTarget].scale = val / 100; sliderScale.value = val; drawCard(); });
+
+    function adjustValue(prop, delta) {
+        saveHistory();
+        const el = elements[currentTarget];
+        if (prop === 'x') el.x += delta;
+        if (prop === 'y') el.y += delta;
+        if (prop === 'scale') {
+            let sc = Math.round(el.scale * 100) + delta;
+            if(sc < 10) sc = 10; if(sc > 400) sc = 400;
+            el.scale = sc / 100;
+        }
+        updateInputsFromState(); drawCard();
+    }
+
+    function updateInputsFromState() {
+        const el = elements[currentTarget];
+        sliderX.value = el.x; numX.value = el.x; sliderY.value = el.y; numY.value = el.y;
+        const sc = Math.round(el.scale * 100); sliderScale.value = sc; numScale.value = sc;
+        document.getElementById('targetSelect').value = currentTarget;
+    }
+
+    let isDragging = false, dragStartX = 0, dragStartY = 0, initialX = 0, initialY = 0;
+
+    function getHitBoxes() {
+        const boxes = [];
+        const sx = elements.skills_all.x, sy = elements.skills_all.y, ss = elements.skills_all.scale;
+        const add = (id, x, y, w, h, scale) => { boxes.push({ id, x: x, y: y, w: w * scale, h: h * scale }); };
+        
+        add('hp', elements.hp.x - 350 * elements.hp.scale, elements.hp.y - 10 * elements.hp.scale, 360, 80, 1);
+        add('statusMsg', elements.statusMsg.x, elements.statusMsg.y, 450, 40, elements.statusMsg.scale);
+        
+        // 技4を追加
+        add('skill4', elements.skill4.x + sx, elements.skill4.y + sy, 520, 80, elements.skill4.scale * ss);
+        add('skill3', elements.skill3.x + sx, elements.skill3.y + sy, 520, 80, elements.skill3.scale * ss);
+        add('skill2', elements.skill2.x + sx, elements.skill2.y + sy, 520, 80, elements.skill2.scale * ss);
+        add('skill1', elements.skill1.x + sx, elements.skill1.y + sy, 520, 80, elements.skill1.scale * ss);
+        
+        if(currentImages.attr) add('attr', elements.attr.x, elements.attr.y, 80, 80, elements.attr.scale);
+        if(currentImages.rarity3) add('rarity3', elements.rarity3.x, elements.rarity3.y, 220, 50, elements.rarity3.scale);
+        if(currentImages.rarity2) add('rarity2', elements.rarity2.x, elements.rarity2.y, 220, 50, elements.rarity2.scale);
+        if(currentImages.rarity1) add('rarity1', elements.rarity1.x, elements.rarity1.y, 220, 50, elements.rarity1.scale);
+        add('subName', elements.subName.x, elements.subName.y, 300, 30, elements.subName.scale);
+        add('name', elements.name.x, elements.name.y, 400, 60, elements.name.scale);
+        if (currentImages.frame) { add('frame', layoutCanvas.width - currentImages.frame.width + elements.frame.x, layoutCanvas.height - currentImages.frame.height + elements.frame.y, currentImages.frame.width, currentImages.frame.height, elements.frame.scale); }
+        add('image', 0, 0, layoutCanvas.width, layoutCanvas.height, 1);
+        return boxes;
+    }
+
+    function getPointerPos(e) { return (e.touches && e.touches.length > 0) ? { x: e.touches[0].clientX, y: e.touches[0].clientY } : { x: e.clientX, y: e.clientY }; }
+
+    function startDrag(e) {
+        if (e.type === 'touchstart') e.preventDefault(); 
+        const pos = getPointerPos(e);
+        const rect = layoutCanvas.getBoundingClientRect();
+        const cx = (pos.x - rect.left) * (layoutCanvas.width / rect.width);
+        const cy = (pos.y - rect.top) * (layoutCanvas.height / rect.height);
+        
+        // ▼ 自動選択ON(固定されていない)場合のみ当たり判定を行う ▼
+        if (!isLockMode) {
+            const boxes = getHitBoxes();
+            for (let b of boxes) { 
+                if (cx >= b.x && cx <= b.x + b.w && cy >= b.y && cy <= b.y + b.h) { 
+                    let target = b.id;
+                    // プルダウンで「まとめて移動」が選ばれている時は、まとめて移動を優先維持する
+                    if (target.startsWith('skill') && document.getElementById('targetSelect').value === 'skills_all') {
+                        target = 'skills_all';
+                    }
+                    currentTarget = target; 
+                    updateInputsFromState(); 
+                    break; 
+                } 
+            }
+        }
+        
+        saveHistory(); 
+        isDragging = true; dragStartX = pos.x; dragStartY = pos.y; initialX = elements[currentTarget].x; initialY = elements[currentTarget].y;
+    }
+
+    function drag(e) {
+        if (!isDragging) return;
+        const pos = getPointerPos(e), rect = layoutCanvas.getBoundingClientRect();
+        const dx = (pos.x - dragStartX) * (layoutCanvas.width / rect.width), dy = (pos.y - dragStartY) * (layoutCanvas.height / rect.height);
+        elements[currentTarget].x = Math.round(initialX + dx); elements[currentTarget].y = Math.round(initialY + dy);
+        updateInputsFromState(); drawCard();
+    }
+    function endDrag() { isDragging = false; }
+    
+    layoutCanvas.addEventListener('mousedown', startDrag); layoutCanvas.addEventListener('touchstart', startDrag, { passive: false });
+    window.addEventListener('mousemove', drag); window.addEventListener('touchmove', drag, { passive: false });
+    window.addEventListener('mouseup', endDrag); window.addEventListener('touchend', endDrag);
+    
+    // ▼ フリーズ防止処理 ▼
+    window.addEventListener('touchcancel', endDrag);
+    window.addEventListener('blur', endDrag);
+
+    function drawKillgoText(ctx, text, x, y, size, color, borderColor, align = 'left') {
+        ctx.font = `${size}px 'KillgoWeb', 'Dela Gothic One', sans-serif`;
+        ctx.textAlign = align; ctx.textBaseline = "top"; ctx.lineJoin = 'miter'; ctx.miterLimit = 3; 
+        ctx.strokeStyle = borderColor; ctx.lineWidth = size / 4; ctx.strokeText(text, x, y);
+        ctx.fillStyle = color; ctx.fillText(text, x, y);
+    }
+
+    function drawDescText(ctx, text, x, y, maxWidth, lineHeight, fontSize, fillColor, borderColor="#ffffff", isItalic=false, borderWidthRatio=0.12) {
+        const lines = text.split('\n'); let cursorY = y;
+        ctx.font = `${isItalic ? "italic" : "normal"} ${fontSize}px 'NotoSansJPThin', sans-serif`;
+        ctx.textAlign = "left"; ctx.textBaseline = "top"; ctx.lineJoin = 'round';
+        ctx.strokeStyle = borderColor; ctx.lineWidth = fontSize * borderWidthRatio; ctx.fillStyle = fillColor;   
+        lines.forEach(line => {
+            let words = line.split(''), lineBuffer = '';
+            for(let n = 0; n < words.length; n++) {
+                let testLine = lineBuffer + words[n];
+                if (ctx.measureText(testLine).width > maxWidth && n > 0) {
+                    ctx.strokeText(lineBuffer, x, cursorY); ctx.fillText(lineBuffer, x, cursorY);
+                    lineBuffer = words[n]; cursorY += lineHeight;
+                } else { lineBuffer = testLine; }
+            }
+            ctx.strokeText(lineBuffer, x, cursorY); ctx.fillText(lineBuffer, x, cursorY); cursorY += lineHeight;
+        });
+    }
+
+    function drawCard() {
+        const ctx = layoutCanvas.getContext('2d');
+        ctx.clearRect(0, 0, layoutCanvas.width, layoutCanvas.height);
+        ctx.save(); ctx.beginPath();
+        if (ctx.roundRect) { ctx.roundRect(0, 0, layoutCanvas.width, layoutCanvas.height, 30); } else { ctx.rect(0, 0, layoutCanvas.width, layoutCanvas.height); }
+        ctx.clip(); ctx.fillStyle = "#000"; ctx.fillRect(0, 0, layoutCanvas.width, layoutCanvas.height);
+
+        if (currentImages.user) {
+            const el = elements.image; ctx.save();
+            ctx.translate(layoutCanvas.width/2 + el.x, layoutCanvas.height/2 + el.y); ctx.scale(el.scale, el.scale);
+            ctx.drawImage(currentImages.user, -currentImages.user.width/2, -currentImages.user.height/2); ctx.restore();
+        }
+
+        if (currentImages.frame) {
+            const el = elements.frame; ctx.save();
+            ctx.translate(layoutCanvas.width - currentImages.frame.width + el.x, layoutCanvas.height - currentImages.frame.height + el.y);
+            ctx.scale(el.scale, el.scale); ctx.drawImage(currentImages.frame, 0, 0); ctx.restore();
+        }
+
+        const subEl = elements.subName; ctx.save();
+        ctx.translate(subEl.x, subEl.y); ctx.scale(subEl.scale, subEl.scale);
+        drawDescText(ctx, document.getElementById('subName').value, 0, 0, 500, 20, 18, document.getElementById('subColor').value, document.getElementById('subBorder').value, false, 0.25);
+        ctx.restore();
+
+        const nameEl = elements.name, nameSizeOption = document.getElementById('cardNameSize').value;
+        let activeNameSize = nameSizeOption === 'medium' ? 46 : (nameSizeOption === 'small' ? 36 : 56);
+        ctx.save(); ctx.translate(nameEl.x, nameEl.y); ctx.scale(nameEl.scale, nameEl.scale);
+        drawKillgoText(ctx, document.getElementById('cardName').value, 0, 0, activeNameSize, document.getElementById('nameColor').value, document.getElementById('nameBorder').value, "left");
+        ctx.restore();
+
+        ['rarity1', 'rarity2', 'rarity3'].forEach(rKey => {
+            if (currentImages[rKey]) {
+                const el = elements[rKey]; ctx.save();
+                ctx.translate(el.x, el.y); ctx.scale(el.scale, el.scale);
+                ctx.drawImage(currentImages[rKey], 0, 0, 220, currentImages[rKey].height * (220 / currentImages[rKey].width));
+                ctx.restore();
+            }
+        });
+        
+        if (currentImages.attr) {
+            const el = elements.attr; ctx.save();
+            ctx.translate(el.x, el.y); ctx.scale(el.scale, el.scale);
+            ctx.drawImage(currentImages.attr, 0, 0, 80, 80); ctx.restore();
+        }
+
+        const group = elements.skills_all; 
+        for(let i=1; i<=4; i++) {
+            const el = elements['skill' + i];
+            const name = document.getElementById('s' + i + 'Name').value, dmg = document.getElementById('s' + i + 'Dmg').value, desc = document.getElementById('s' + i + 'Desc').value;
+            if(!name && !desc) continue;
+            ctx.save(); ctx.translate(el.x + group.x, el.y + group.y); ctx.scale(el.scale * group.scale, el.scale * group.scale);
+            
+            // 4つ入れるために文字を少しだけ縮小
+            drawKillgoText(ctx, name, 0, 0, 34, document.getElementById('s' + i + 'Color').value, document.getElementById('s' + i + 'Border').value, "left");
+            if(dmg) drawKillgoText(ctx, dmg, 520, 0, 36, document.getElementById('s' + i + 'Color').value, document.getElementById('s' + i + 'Border').value, "right");
+            if(desc) drawDescText(ctx, desc, 0, 40, 520, 22, 20, document.getElementById('s' + i + 'DescColor').value, "#ffffff", false, 0.12);
+            ctx.restore();
+        }
+
+        const statusEl = elements.statusMsg; ctx.save();
+        ctx.translate(statusEl.x, statusEl.y); ctx.scale(statusEl.scale, statusEl.scale);
+        drawDescText(ctx, document.getElementById('statusMsg').value, 0, 0, 450, 24, 20, document.getElementById('statusColor').value, document.getElementById('statusBorder').value, true, 0.25);
+        ctx.restore();
+
+        const hpEl = elements.hp, hpVal = document.getElementById('hpVal').value;
+        ctx.save(); ctx.translate(hpEl.x, hpEl.y); ctx.scale(hpEl.scale, hpEl.scale);
+        ctx.font = "900 46px 'Dela Gothic One', sans-serif"; ctx.textAlign = "right"; ctx.lineJoin = "miter"; ctx.miterLimit = 3;
+        ctx.strokeStyle = "#000"; ctx.lineWidth = 8; ctx.strokeText(hpVal, 0, 0); 
+        ctx.fillStyle = document.getElementById('hpNumColor').value; ctx.fillText(hpVal, 0, 0);   
+        const hpLabelX = -(ctx.measureText(hpVal).width + 8); 
+        ctx.strokeStyle = "#000"; ctx.strokeText("HP", hpLabelX, 0);
+        const grad = ctx.createLinearGradient(0, -35, 0, 10); grad.addColorStop(0, "#FFFF00"); grad.addColorStop(1, "#FF8C00");
+        ctx.fillStyle = grad; ctx.fillText("HP", hpLabelX, 0);
+        ctx.restore(); ctx.restore(); 
+
+        const eCtx = editCanvas.getContext('2d');
+        eCtx.clearRect(0, 0, editCanvas.width, editCanvas.height);
+        eCtx.drawImage(layoutCanvas, 0, 0);
+    }
+
+    function downloadCard() {
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+        if (isIOS) {
+            layoutCanvas.toBlob(async function(blob) {
+                const file = new File([blob], 'オリジナルカード.png', { type: 'image/png' });
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    try { await navigator.share({ files: [file] }); return; } catch (error) { console.log('Share canceled.', error); }
+                }
+                fallbackDownload(); 
+            }, 'image/png');
+        } else {
+            fallbackDownload();
+        }
+
+        function fallbackDownload() {
+            const link = document.createElement('a'); link.download = 'card_maker_image.png'; link.href = layoutCanvas.toDataURL('image/png'); link.click();
+        }
+    }
+</script>
+
+</body>
+</html>
