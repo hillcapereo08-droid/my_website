@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Card Maker V43 - Auto Wrap & Dynamic Push-down</title>
+    <title>Card Maker V44 - Smart UI & Smooth Drag</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -100,6 +100,12 @@
         .btn-dl-layout { flex: 1; padding: 10px; background: linear-gradient(135deg, #ff4757, #ff6b81); color: #fff; border: none; font-weight: 900; font-family: 'Noto Sans JP', sans-serif; font-size: 1.05rem; border-radius: 8px; cursor: pointer; text-shadow: 1px 1px 3px rgba(0,0,0,0.5); box-shadow: 0 4px 15px rgba(255, 71, 87, 0.4); }
         .btn-dl-layout:active { transform: translateY(3px); box-shadow: 0 2px 10px rgba(255, 71, 87, 0.4); }
 
+        /* ▼ モード切替の装飾（絵文字なし） ▼ */
+        .layout-top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; gap: 10px; }
+        .mode-switch { display: flex; gap: 10px; background: #000; padding: 10px; border-radius: 8px; border: 1px solid var(--accent); flex: 1; }
+        .mode-switch label { margin: 0; flex: 1; font-size: 0.8rem; color: #fff; display: flex; align-items: center; gap: 3px; cursor: pointer; justify-content: center; }
+        .mode-switch input[type="radio"] { width: 16px; height: 16px; margin: 0; accent-color: var(--accent); }
+
         #cropModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.95); z-index: 9999; flex-direction: column; align-items: center; justify-content: center; }
         .crop-container { width: 95%; max-height: 70vh; background: #000; margin-bottom: 20px; border-radius: 8px; overflow: hidden; }
         .crop-container img { max-width: 100%; display: block; }
@@ -148,7 +154,7 @@
             </div>
 
             <label style="margin-top: 20px;">二つ名 (肩書き)</label>
-            <input type="text" id="subName" value="">
+            <input type="text" id="subName" value="片翼の天使">
             <div class="color-row">
                 <label>文字色</label><input type="color" id="subColor" value="#000000">
                 <label>縁色</label><input type="color" id="subBorder" value="#ffffff">
@@ -159,7 +165,7 @@
             <div class="section-box box-accent">
                 <label>技1</label>
                 <div style="display:flex; gap:10px;">
-                    <input type="text" id="s1Name" value="" style="flex:2">
+                    <input type="text" id="s1Name" value="八刀一閃" style="flex:2">
                     <input type="number" id="s1Dmg" value="500" style="flex:1">
                 </div>
                 <div class="color-row">
@@ -167,12 +173,12 @@
                     <label>縁</label><input type="color" id="s1Border" value="#ffffff">
                     <label>説明</label><input type="color" id="s1DescColor" value="#000000">
                 </div>
-                <textarea id="s1Desc" rows="2"></textarea>
+                <textarea id="s1Desc" rows="2">このカードはいかなる効果を受けず、手札にいる時はダメージを受けない</textarea>
             </div>
             <div class="section-box">
                 <label>技2</label>
                 <div style="display:flex; gap:10px;">
-                    <input type="text" id="s2Name" value="" style="flex:2">
+                    <input type="text" id="s2Name" value="片翼の天使" style="flex:2">
                     <input type="number" id="s2Dmg" value="" style="flex:1">
                 </div>
                 <div class="color-row">
@@ -180,12 +186,12 @@
                     <label>縁</label><input type="color" id="s2Border" value="#ffffff">
                     <label>説明</label><input type="color" id="s2DescColor" value="#000000">
                 </div>
-                <textarea id="s2Desc" rows="2"></textarea>
+                <textarea id="s2Desc" rows="2">このカードに無効化や無視は通用しない</textarea>
             </div>
             <div class="section-box">
                 <label>技3</label>
                 <div style="display:flex; gap:10px;">
-                    <input type="text" id="s3Name" value="" style="flex:2">
+                    <input type="text" id="s3Name" value="スーパーノヴァ" style="flex:2">
                     <input type="number" id="s3Dmg" value="9999" style="flex:1">
                 </div>
                 <div class="color-row">
@@ -193,7 +199,7 @@
                     <label>縁</label><input type="color" id="s3Border" value="#ffffff">
                     <label>説明</label><input type="color" id="s3DescColor" value="#000000">
                 </div>
-                <textarea id="s3Desc" rows="2"></textarea>
+                <textarea id="s3Desc" rows="2">相手のHPを１にする</textarea>
             </div>
             <div class="section-box">
                 <label>技4</label>
@@ -211,8 +217,8 @@
         </div>
 
         <div id="tab-status" class="control-section">
-            <label>ステータスメッセージ (フレーバーテキスト)</label>
-            <input type="text" id="statusMsg" value="">
+            <label>ステータスメッセージ</label>
+            <input type="text" id="statusMsg" value="絶望を贈ろうーーー">
             <div class="color-row">
                 <label>文字色</label><input type="color" id="statusColor" value="#ffffff">
                 <label>縁色</label><input type="color" id="statusBorder" value="#000000">
@@ -243,7 +249,6 @@
                 <div style="flex:1; min-width:85px;"><label>レア3</label><select id="rarity3Select" onchange="changeAsset('rarity3', 'rarity')"></select></div>
             </div>
         </div>
-
     </div>
 </div>
 
@@ -260,6 +265,13 @@
 
     <div class="layout-controls">
         <div id="padContainer">
+            <div class="layout-top-bar">
+                <div class="mode-switch">
+                    <label><input type="radio" name="dragMode" value="dropdown"> リスト連動</label>
+                    <label><input type="radio" name="dragMode" value="direct" checked> 直接タッチ</label>
+                </div>
+            </div>
+            
             <div class="history-bar">
                 <button class="btn-history btn-undo" onclick="undoLayout()">↩ 戻す</button>
                 <button class="btn-history btn-reset-single" onclick="resetCurrentLayout()">選択リセット</button>
@@ -268,20 +280,6 @@
 
             <select id="targetSelect" style="margin-bottom: 15px;">
                 <option value="image">メイン画像</option>
-                <option value="frame">フレーム画像</option>
-                <option value="name">カード名</option>
-                <option value="subName">二つ名</option>
-                <option value="rarity1">レアリティ 1</option>
-                <option value="rarity2">レアリティ 2</option>
-                <option value="rarity3">レアリティ 3</option>
-                <option value="attr">属性画像 (右上)</option>
-                <option value="skills_all" style="font-weight:bold; color:var(--accent);">★ 技1〜4 (まとめて移動)</option>
-                <option value="skill1">技1 (個別微調整)</option>
-                <option value="skill2">技2 (個別微調整)</option>
-                <option value="skill3">技3 (個別微調整)</option>
-                <option value="skill4">技4 (個別微調整)</option>
-                <option value="statusMsg">ステータス (左下)</option>
-                <option value="hp">HP表示</option>
             </select>
             
             <div class="range-group">
@@ -308,9 +306,9 @@
         </div>
 
         <div class="bottom-actions">
-            <button id="btnExpandToggle" class="btn-action" onclick="toggleExpandMode()">拡大</button>
+            <button id="btnExpandToggle" class="btn-action" onclick="toggleExpandMode()">拡大モード</button>
             <button id="btnLockToggle" class="btn-action" onclick="toggleLockMode()" style="background:#2e7d32; border-color:#4caf50;">自動選択ON</button>
-            <button class="btn-dl-layout" onclick="downloadCard()">保存</button>
+            <button class="btn-dl-layout" onclick="downloadCard()">スマホに保存</button>
         </div>
     </div>
 </div>
@@ -343,9 +341,9 @@
         const pad = document.getElementById('padContainer');
         const btn = document.getElementById('btnExpandToggle');
         if(isExpanded) {
-            modal.classList.add('expanded-mode'); pad.style.display = 'none'; btn.innerHTML = 'パッド';
+            modal.classList.add('expanded-mode'); pad.style.display = 'none'; btn.innerHTML = 'パッド表示';
         } else {
-            modal.classList.remove('expanded-mode'); pad.style.display = 'block'; btn.innerHTML = '拡大';
+            modal.classList.remove('expanded-mode'); pad.style.display = 'block'; btn.innerHTML = '拡大モード';
         }
     }
 
@@ -362,9 +360,8 @@
 
     const assets = {
         rarity: [
-            { name: "なし", path: "" },
-            { name: "★1",  path: "rarity1.png" }, { name: "★2",  path: "rarity2.png" }, { name: "★3",  path: "rarity3.png" },
-            { name: "★4",  path: "rarity4.png" }, { name: "★5",  path: "rarity5.png" },
+            { name: "なし", path: "" }, { name: "★1",  path: "rarity1.png" }, { name: "★2",  path: "rarity2.png" }, 
+            { name: "★3",  path: "rarity3.png" }, { name: "★4",  path: "rarity4.png" }, { name: "★5",  path: "rarity5.png" },
         ],
         attr: [
             { name: "なし", path: "" }, { name: "火",   path: "1.png" }, { name: "水",   path: "2.png" }, { name: "風",   path: "3.png" },
@@ -373,10 +370,9 @@
             { name: "龍",   path: "12.png" }, { name: "謎",   path: "13.png" }, { name: "毒",   path: "14.png" }, { name: "無",   path: "15.png" },
         ],
         frame: [
-            { name: "なし", path: "" },
-            { name: "黄色1", path: "./frame8.png" }, { name: "黄色2", path: "./frame2.png" }, { name: "赤色", path: "./frame3.png" },
-            { name: "青色", path: "./frame1.png" }, { name: "緑色", path: "./frame4.png" }, { name: "紫色", path: "./frame5.png" },
-            { name: "ピンク色", path: "./frame6.png" }, { name: "黒色", path: "./frame7.png" }
+            { name: "なし", path: "" }, { name: "黄色1", path: "./frame8.png" }, { name: "黄色2", path: "./frame2.png" }, 
+            { name: "赤色", path: "./frame3.png" }, { name: "青色", path: "./frame1.png" }, { name: "緑色", path: "./frame4.png" }, 
+            { name: "紫色", path: "./frame5.png" }, { name: "ピンク色", path: "./frame6.png" }, { name: "黒色", path: "./frame7.png" }
         ]
     };
 
@@ -384,7 +380,6 @@
     const layoutCanvas = document.getElementById('layoutCanvas');
     const currentImages = { user: null, frame: null, rarity1: null, rarity2: null, rarity3: null, attr: null };
 
-    // ▼ フォント大型化に合わせ、初期Y座標を調整 ▼
     const elements = {
         image:      { x: 0, y: 0, scale: 1.0 },
         frame:      { x: -300, y: -435, scale: 2.0 }, 
@@ -407,7 +402,6 @@
     let historyStack = []; 
     let currentTarget = 'image';
     
-    // ▼ 動的押し出しや枠の大きさを記憶するグローバル変数 ▼
     window.dynamicOffsets = { skill1: 0, skill2: 0, skill3: 0, skill4: 0, statusMsg: 0 };
     window.hitBoxHeights = {};
 
@@ -492,6 +486,7 @@
     }
     function closeCropModal() { cropModal.style.display = 'none'; if(cropper) { cropper.destroy(); cropper = null; } document.getElementById('uploadImage').value = ''; }
 
+    // 全入力フィールドで即座に反映させる
     document.querySelectorAll('input:not(#uploadImage), select:not(#targetSelect), textarea').forEach(el => {
         if(el.type !== 'range' && el.type !== 'radio' && !el.classList.contains('btn-step') && el.id !== 'numX' && el.id !== 'numY' && el.id !== 'numScale') { 
             el.addEventListener('input', drawCard); 
@@ -535,20 +530,73 @@
         document.getElementById('targetSelect').value = currentTarget;
     }
 
+    // ▼ スマート・レイアウト選択（使用中のみ表示） ▼
+    function updateTargetSelectOptions() {
+        const selectEl = document.getElementById('targetSelect');
+        if(!selectEl) return;
+        const currentVal = selectEl.value;
+        const options = [];
+        
+        if (currentImages.user) options.push({ val: 'image', text: 'メイン画像' });
+        if (currentImages.frame) options.push({ val: 'frame', text: 'フレーム画像' });
+        if (document.getElementById('cardName').value.trim() !== '') options.push({ val: 'name', text: 'カード名' });
+        if (document.getElementById('subName').value.trim() !== '') options.push({ val: 'subName', text: '二つ名' });
+        if (currentImages.rarity1) options.push({ val: 'rarity1', text: 'レアリティ 1' });
+        if (currentImages.rarity2) options.push({ val: 'rarity2', text: 'レアリティ 2' });
+        if (currentImages.rarity3) options.push({ val: 'rarity3', text: 'レアリティ 3' });
+        if (currentImages.attr) options.push({ val: 'attr', text: '属性画像' });
+        
+        const s1 = document.getElementById('s1Name').value.trim() !== '' || document.getElementById('s1Desc').value.trim() !== '';
+        const s2 = document.getElementById('s2Name').value.trim() !== '' || document.getElementById('s2Desc').value.trim() !== '';
+        const s3 = document.getElementById('s3Name').value.trim() !== '' || document.getElementById('s3Desc').value.trim() !== '';
+        const s4 = document.getElementById('s4Name').value.trim() !== '' || document.getElementById('s4Desc').value.trim() !== '';
+        
+        if (s1 || s2 || s3 || s4) options.push({ val: 'skills_all', text: '技 (まとめて移動)' });
+        if (s1) options.push({ val: 'skill1', text: '技 1' });
+        if (s2) options.push({ val: 'skill2', text: '技 2' });
+        if (s3) options.push({ val: 'skill3', text: '技 3' });
+        if (s4) options.push({ val: 'skill4', text: '技 4' });
+        
+        if (document.getElementById('statusMsg').value.trim() !== '') options.push({ val: 'statusMsg', text: 'ステータス' });
+        if (document.getElementById('hpVal').value.trim() !== '') options.push({ val: 'hp', text: 'HP表示' });
+        
+        if(options.length === 0) options.push({ val: 'image', text: 'メイン画像' });
+
+        const currentOptionsStr = Array.from(selectEl.options).map(o => o.value).join(',');
+        const newOptionsStr = options.map(o => o.val).join(',');
+        
+        if (currentOptionsStr !== newOptionsStr) {
+            selectEl.innerHTML = '';
+            let found = false;
+            options.forEach(opt => {
+                const o = document.createElement('option');
+                o.value = opt.val; o.textContent = opt.text;
+                selectEl.appendChild(o);
+                if(opt.val === currentVal) found = true;
+            });
+            if(found) {
+                selectEl.value = currentVal;
+            } else {
+                selectEl.selectedIndex = 0;
+                currentTarget = selectEl.value;
+                updateInputsFromState();
+            }
+        }
+    }
+
     let isDragging = false, dragStartX = 0, dragStartY = 0, initialX = 0, initialY = 0;
 
     function getHitBoxes() {
         const boxes = [];
         const sx = elements.skills_all.x, sy = elements.skills_all.y, ss = elements.skills_all.scale;
-        const add = (id, x, y, w, h, scale) => { boxes.push({ id, x: x, y: y, w: w * scale, h: h * scale }); };
-        
         let d = window.dynamicOffsets || {};
         let hInfo = window.hitBoxHeights || {};
+
+        const add = (id, x, y, w, h, scale) => { boxes.push({ id, x: x, y: y, w: w * scale, h: h * scale }); };
 
         add('hp', elements.hp.x - 350 * elements.hp.scale, elements.hp.y - 10 * elements.hp.scale, 360, 80, 1);
         add('statusMsg', elements.statusMsg.x, elements.statusMsg.y + (d.statusMsg||0), 450, 40, elements.statusMsg.scale);
         
-        // 当たり判定の枠も、文字の長さに応じて自動拡張＆自動ズレする
         add('skill4', elements.skill4.x + sx, elements.skill4.y + sy + (d.skill4||0), 520, hInfo.skill4||80, elements.skill4.scale * ss);
         add('skill3', elements.skill3.x + sx, elements.skill3.y + sy + (d.skill3||0), 520, hInfo.skill3||80, elements.skill3.scale * ss);
         add('skill2', elements.skill2.x + sx, elements.skill2.y + sy + (d.skill2||0), 520, hInfo.skill2||80, elements.skill2.scale * ss);
@@ -568,7 +616,9 @@
     function getPointerPos(e) { return (e.touches && e.touches.length > 0) ? { x: e.touches[0].clientX, y: e.touches[0].clientY } : { x: e.clientX, y: e.clientY }; }
 
     function startDrag(e) {
-        if (e.type === 'touchstart') e.preventDefault(); 
+        // ▼ スクロールを止めてドラッグ操作を安定させる ▼
+        if (e.type === 'touchstart' && e.cancelable) e.preventDefault(); 
+        
         const pos = getPointerPos(e);
         const mode = document.querySelector('input[name="dragMode"]:checked').value;
         const rect = layoutCanvas.getBoundingClientRect();
@@ -583,9 +633,13 @@
                     if (target.startsWith('skill') && document.getElementById('targetSelect').value === 'skills_all') {
                         target = 'skills_all';
                     }
-                    currentTarget = target; 
-                    updateInputsFromState(); 
-                    break; 
+                    // そのパーツが非表示（選択肢にない）場合は無視する
+                    const selectEl = document.getElementById('targetSelect');
+                    if(selectEl.querySelector(`option[value="${target}"]`)) {
+                        currentTarget = target; 
+                        updateInputsFromState(); 
+                        break; 
+                    }
                 } 
             }
         }
@@ -596,6 +650,7 @@
 
     function drag(e) {
         if (!isDragging) return;
+        if (e.type === 'touchmove' && e.cancelable) e.preventDefault();
         const pos = getPointerPos(e), rect = layoutCanvas.getBoundingClientRect();
         const dx = (pos.x - dragStartX) * (layoutCanvas.width / rect.width), dy = (pos.y - dragStartY) * (layoutCanvas.height / rect.height);
         elements[currentTarget].x = Math.round(initialX + dx); elements[currentTarget].y = Math.round(initialY + dy);
@@ -603,43 +658,36 @@
     }
     
     function endDrag() { isDragging = false; }
+    
     layoutCanvas.addEventListener('mousedown', startDrag); layoutCanvas.addEventListener('touchstart', startDrag, { passive: false });
     window.addEventListener('mousemove', drag); window.addEventListener('touchmove', drag, { passive: false });
     window.addEventListener('mouseup', endDrag); window.addEventListener('touchend', endDrag);
     window.addEventListener('touchcancel', endDrag); window.addEventListener('blur', endDrag);
 
-    // ▼ 自動改行・折り返し対応の最強テキスト描画関数 ▼
+    // ▼ 文字の自動改行・押し出し描画システム ▼
     function renderWrappedText(ctx, text, x, y, maxWidth, lineHeight, action = 'draw') {
         if (!text) return 0;
-        const lines = text.split('\n');
-        let cursorY = y;
+        const lines = text.split('\n'); let cursorY = y;
         lines.forEach(line => {
-            let words = line.split('');
-            let lineBuffer = '';
+            let words = line.split(''), lineBuffer = '';
             for(let n = 0; n < words.length; n++) {
                 let testLine = lineBuffer + words[n];
                 if (ctx.measureText(testLine).width > maxWidth && n > 0) {
                     if (action === 'draw') { ctx.strokeText(lineBuffer, x, cursorY); ctx.fillText(lineBuffer, x, cursorY); }
-                    lineBuffer = words[n];
-                    cursorY += lineHeight;
-                } else {
-                    lineBuffer = testLine;
-                }
+                    lineBuffer = words[n]; cursorY += lineHeight;
+                } else { lineBuffer = testLine; }
             }
             if (action === 'draw') { ctx.strokeText(lineBuffer, x, cursorY); ctx.fillText(lineBuffer, x, cursorY); }
             cursorY += lineHeight;
         });
-        return cursorY - y; // 使用した高さを返す
+        return cursorY - y; 
     }
 
     function drawKillgoText(ctx, text, x, y, size, color, borderColor, align = 'left', maxWidth = 9999) {
         ctx.font = `${size}px 'KillgoWeb', 'Dela Gothic One', sans-serif`;
         ctx.textAlign = align; ctx.textBaseline = "top"; ctx.lineJoin = 'miter'; ctx.miterLimit = 3; 
         ctx.strokeStyle = borderColor; ctx.lineWidth = size / 4; ctx.fillStyle = color;
-        // 右揃え（ダメージ）はそのまま描画、それ以外は端ガード発動
-        if(align === 'right') {
-            ctx.strokeText(text, x, y); ctx.fillText(text, x, y); return size * 1.2;
-        }
+        if(align === 'right') { ctx.strokeText(text, x, y); ctx.fillText(text, x, y); return size * 1.2; }
         return renderWrappedText(ctx, text, x, y, maxWidth, size * 1.2, 'draw');
     }
 
@@ -669,7 +717,6 @@
             ctx.scale(el.scale, el.scale); ctx.drawImage(currentImages.frame, 0, 0); ctx.restore();
         }
 
-        // ▼ 全フォントの画面端ガード（自動改行）計算 ▼
         const subEl = elements.subName; ctx.save();
         ctx.translate(subEl.x, subEl.y); ctx.scale(subEl.scale, subEl.scale);
         drawDescText(ctx, document.getElementById('subName').value, 0, 0, Math.max(100, 600 - subEl.x - 20), 20, 18, document.getElementById('subColor').value, document.getElementById('subBorder').value, false, 0.25);
@@ -696,21 +743,16 @@
             ctx.drawImage(currentImages.attr, 0, 0, 80, 80); ctx.restore();
         }
 
-        // ▼ 技の自動押し出し＆端ガードシステム ▼
+        // ▼ 技の自動押し出し計算＆描画 ▼
         const group = elements.skills_all; 
-        let currentPushDown = 0; // どれくらい下に押し出されるかの蓄積
+        let currentPushDown = 0; 
 
         for(let i=1; i<=4; i++) {
             const el = elements['skill' + i];
             const name = document.getElementById('s' + i + 'Name').value, dmg = document.getElementById('s' + i + 'Dmg').value, desc = document.getElementById('s' + i + 'Desc').value;
             
-            // 当たり判定・押し出し処理のために現在のYズレを記録
             window.dynamicOffsets['skill' + i] = currentPushDown;
-            
-            if(!name && !desc) {
-                window.hitBoxHeights['skill' + i] = 0;
-                continue;
-            }
+            if(!name && !desc) { window.hitBoxHeights['skill' + i] = 0; continue; }
 
             ctx.save(); 
             let actualX = el.x + group.x;
@@ -718,30 +760,21 @@
             ctx.translate(actualX, actualY); 
             ctx.scale(el.scale * group.scale, el.scale * group.scale);
             
-            // さらにフォントを大きく調整！ (名前:42, ダメージ:44)
-            let nameUsedHeight = drawKillgoText(ctx, name, 0, 0, 42, document.getElementById('s' + i + 'Color').value, document.getElementById('s' + i + 'Border').value, "left", Math.max(100, 600 - actualX - 100)); // ダメージ分の余白残し
+            let nameUsedHeight = drawKillgoText(ctx, name, 0, 0, 42, document.getElementById('s' + i + 'Color').value, document.getElementById('s' + i + 'Border').value, "left", Math.max(100, 600 - actualX - 100)); 
             if(dmg) drawKillgoText(ctx, dmg, 520, 0, 44, document.getElementById('s' + i + 'Color').value, document.getElementById('s' + i + 'Border').value, "right");
             
-            // 説明文のY位置は技名の高さに応じてズレる
             let descStartY = Math.max(50, nameUsedHeight + 5);
             let descUsedHeight = 0;
-            if(desc) {
-                descUsedHeight = drawDescText(ctx, desc, 0, descStartY, Math.max(100, 600 - actualX - 30), 30, 24, document.getElementById('s' + i + 'DescColor').value, "#ffffff", false, 0.12);
-            }
+            if(desc) { descUsedHeight = drawDescText(ctx, desc, 0, descStartY, Math.max(100, 600 - actualX - 30), 30, 24, document.getElementById('s' + i + 'DescColor').value, "#ffffff", false, 0.12); }
             ctx.restore();
 
-            // この技が使ったトータルの高さを計算
             let totalBlockHeight = descStartY + descUsedHeight;
             window.hitBoxHeights['skill' + i] = totalBlockHeight;
 
-            // もし通常(約85px)より大きく膨らんだら、その分だけ次の技を下に押し出す
             let standardHeight = 85;
-            if(totalBlockHeight > standardHeight) {
-                currentPushDown += (totalBlockHeight - standardHeight);
-            }
+            if(totalBlockHeight > standardHeight) { currentPushDown += (totalBlockHeight - standardHeight); }
         }
 
-        // ステータス枠も押し出された分ズレる
         window.dynamicOffsets['statusMsg'] = currentPushDown;
         const statusEl = elements.statusMsg; ctx.save();
         ctx.translate(statusEl.x, statusEl.y + currentPushDown); ctx.scale(statusEl.scale, statusEl.scale);
@@ -762,6 +795,9 @@
         const eCtx = editCanvas.getContext('2d');
         eCtx.clearRect(0, 0, editCanvas.width, editCanvas.height);
         eCtx.drawImage(layoutCanvas, 0, 0);
+        
+        // ▼ 最後にプルダウンを使用中のみに更新 ▼
+        updateTargetSelectOptions();
     }
 
     function downloadCard() {
